@@ -11,12 +11,6 @@ library(terra)
 
 #last lecture we talked about population density
 #today we will talk about distribution
-#we are learning how to do a subset of file in a datafile
-#with the package we also installed a file dataset
-#inside di sdm folder there is a external folder with a lot of data
-
-#last lecture we talked about population density
-#today we will talk about distribution
 
 #this finds the name of R system files and it checks whereare the files
 file <- system.file("external/species.shp", package="sdm")
@@ -24,7 +18,6 @@ file <- system.file("external/species.shp", package="sdm")
 #extention shp is related to the data related to species (sph= shape file), it is a file originally from a company and it has been established as standard
 #now we need to establish which package we want to use 
 #in general / means it is what we want to search for by specifying what is inside
-
 
 file
 #here we can see the path of the file
@@ -63,4 +56,51 @@ par(mfrow=c(1,2))
 plot(rana, main = "ciao")
 plot(pres)
 dev.off()
-#with  "main = "ciao"" we can add titles to the graph
+#with  (main = "ciao") we can add titles to the graph
+#now select absenties of rana
+
+abs<-rana[rana$Occurrence==0]
+plot(abs, main = "absence")
+
+#in the absence situation we dont have the certainty so we have an observer bias
+
+
+
+#another excercise
+#plot in a multiframe presence and absences
+abs<-rana[rana$Occurrence==0]
+par(mfrow=c(1,2))
+plot(pres, main = "Presences")
+plot(abs, main = "Absences")
+#the rectangle is smaller cause the abdences is smaller 
+
+#plot in a multiframe presences above the absences
+par(mfrow=c(2,1))
+plot(pres, main = "Presences")
+plot(abs, main = "Absences")
+
+#plot all togheter
+par(mfrow=c(3,1))
+plot(rana, main = "All")
+plot(pres, main = "Presences")
+plot(abs, main = "Absences")
+
+#plot the presence and the absence in different colors 
+plot(pres, col="blue", cex=0.5, pch=19)
+points(abs, col="red", cex=0.5, pch=19)
+
+#we have to use covariets (enviromental data in raster (image) form)
+#ASCII is a sequencial file related to the raster data
+#we are going to make use of elevation
+#let's go thorought different data
+
+elev <- system.file("external/elevation.asc", package="sdm")
+elev
+
+#we can pass it from a ASCII to a file readeble to R with rast function
+elevmap <- rast(elev)
+elevmap
+plot(elevmap)
+cl <- colorRampPalette(c("palegreen3", "purple1", "orange"))(100)
+plot(elevmap, col=cl)
+points(pres, col="black", cex=0.5, pch=19)
