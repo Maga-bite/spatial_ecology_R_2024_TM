@@ -102,3 +102,6 @@ im.plotRGB(sentstack, r=3, g=2, b=1)
 im.plotRGB(sentstack, r=4, g=3, b=2)
 im.plotRGB(sentstack, r=3, g=4, b=2)
 im.plotRGB(sentstack, r=3, g=2, b=4)
+
+#the band rappresent different light spectrum and are understendable on the site: Sentinel-2 bands
+#https://gisgeography.com/sentinel-2-bands-combinations/
