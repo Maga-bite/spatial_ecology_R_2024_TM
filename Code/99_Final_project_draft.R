@@ -300,3 +300,71 @@ ggplot(combined) +
   scale_color_manual(values = c("ISTAT" = "blue", "GADM" = "red")) +
   ggtitle("Sovrapposizione dei confini della provincia di Sondrio") +
   theme_minimal()
+
+
+#-------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+# Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
+# Author: Tommaso Magarotto
+# Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) and climate data,
+# aggregated by season over the last 5 years
+
+# Set working directory
+getwd()
+
+# Load necessary libraries
+library(sf)       # For handling spatial vector data
+library(geodata)  # For downloading administrative boundaries
+
+# --------------------------------------------
+# 1. Load and explore administrative boundaries
+# --------------------------------------------
+
+# Load ISTAT shapefile (downloaded from: https://www.istat.it/...01012025)
+province_istat <- st_read("C:/Users/Tommy/Documents/Limiti01012025/ProvCM01012025")
+
+# Filter the province of interest (Sondrio) from ISTAT data
+sondrio_istat <- province_istat[province_istat$DEN_UTS == "Sondrio", ]
+
+# Fix potential geometry issues
+sondrio_istat <- st_make_valid(sondrio_istat)
+
+# Optional: plot ISTAT Sondrio to visualize
+plot(st_geometry(sondrio_istat), main = "Sondrio Province (ISTAT)")
+
+# --------------------------------------------
+# 2. Download GADM data for comparison
+# --------------------------------------------
+
+# Download level-2 administrative boundaries for Italy using geodata (level 2 = province)
+italy_admin2 <- gadm(country = "ITA", level = 2, path = tempdir())
+
+# Filter Sondrio province from GADM dataset
+sondrio_gadm <- italy_admin2[italy_admin2$NAME_2 == "Sondrio", ]
+sondrio_gadm <- st_as_sf(sondrio_gadm)
+
+# --------------------------------------------
+# 3. Create a bounding box to simplify analysis
+# --------------------------------------------
+
+# Create a bounding box that completely includes the province of Sondrio
+bbox <- st_bbox(sondrio_gadm)
+bbox_poly <- st_as_sfc(bbox)
+
+# Convert bounding box to an 'sf' object with the same CRS as GADM data
+bbox_poly <- st_sf(geometry = bbox_poly, crs = st_crs(sondrio_gadm))
+
+# Transform ISTAT geometry to match CRS of bounding box
+sondrio_istat <- st_transform(sondrio_istat, crs = st_crs(bbox_poly))
+
+# --------------------------------------------
+# 4. Visualize the bounding box and province
+# --------------------------------------------
+
+# Plot the bounding box and overlay Sondrio province (ISTAT)
+plot(st_geometry(bbox_poly), border = "red", lwd = 2, main = "Bounding Box + Sondrio Province (ISTAT)")
+plot(st_geometry(sondrio_istat), add = TRUE, col = rgb(0, 0, 1, 0.3), border = "blue")
