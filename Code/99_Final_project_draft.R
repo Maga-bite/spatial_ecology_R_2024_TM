@@ -56,8 +56,37 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 st_as_text(st_geometry(bbox_polygon))
 
 
+# Plant seasonal phases:
+
+# Avoiding the dormancy period cause NDVI dosen't see the photosynthetic activity since it's too low or even absent
+
+# Vegetative awakening (Spring): May 10 – June 9
+# During this phase, the first leaves start to appear, with flowering and the beginning of growth. 
+# The NDVI (Normalized Difference Vegetation Index) shows rapid growth.
+#
+# ☀Maximum activity (Early Summer): June 25 – July 24
+# This is the period of maximum photosynthesis, with full leaf coverage. NDVI reaches its peak.
+#
+# Summer stress (Late Summer): August 9 – September 9
+# During this phase, plants may experience water stress. NDVI stabilizes or shows a slight decrease.
+#
+# Early senescence (Pre-Autumn): September 25 – October 25
+# Leaves begin to yellow, and photosynthetic activity decreases. NDVI shows a noticeable drop.
+#
+# The selected time intervals for each phase correspond to approximately 30 days, representing the critical periods of 
+# plant growth, stress, and senescence. These will be used to analyze the impact of drought on vegetation over the years. 
+# This approach helps monitor the seasonal evolution of NDVI and identify anomalies related to extreme events (drought, floods) 
+# observed in Italy between 2019 and 2023.
+
+
 #THIS WAY
 #Image format:
+
+#In sintesi:
+#Usa i layer: True Color, NDVI, False Color (urban)
+#Scarica B04, B08, B02, B03, B11, B12
+#Risoluzione: 10 m dove possibile
+
 
 #TIFF (32-bit float)
 #Image resolution: HIGH
