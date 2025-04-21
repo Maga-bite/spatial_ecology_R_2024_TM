@@ -1,12 +1,12 @@
-# Spatial Ecology Project: NDVI & Drought Impact - Municipalities of interest (in the Province of Sondrio)
+# Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
 # Author: Tommaso Magarotto
 # Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
 # and climate data, aggregated by season over the last 5 years
 
-# The period we will focus on is from 2019 to 2023. 
-# Italy experienced several extreme events during this period, including droughts and floods. 
+# The time period we will focus on is from 2019 to 2023. 
+# During this period, Italy experienced several extreme events, including droughts and floods. 
 # Our goal is to assess the impact of these extreme events on mountainous ecosystems, 
-# particularly concerning their resilience and overall functioning.
+# particularly in relation to their resilience and overall functioning.
 
 # Load required libraries
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
@@ -64,7 +64,7 @@ st_as_text(st_geometry(bbox_polygon))
 # During this phase, the first leaves start to appear, with flowering and the beginning of growth. 
 # The NDVI (Normalized Difference Vegetation Index) shows rapid growth.
 #
-# ☀Maximum activity (Early Summer): June 25 – July 24
+# Maximum activity (Early Summer): June 25 – July 24
 # This is the period of maximum photosynthesis, with full leaf coverage. NDVI reaches its peak.
 #
 # Summer stress (Late Summer): August 9 – September 9
@@ -76,10 +76,9 @@ st_as_text(st_geometry(bbox_polygon))
 # The selected time intervals for each phase correspond to approximately 30 days, representing the critical periods of 
 # plant growth, stress, and senescence. These will be used to analyze the impact of drought on vegetation over the years. 
 # This approach helps monitor the seasonal evolution of NDVI and identify anomalies related to extreme events (drought, floods) 
-# observed in Italy between 2019 and 2023.
+# observed in Italy between 2022 and 2024.
 
 
-#THIS WAY
 #Image format:
 
 #In sintesi:
@@ -94,3 +93,51 @@ st_as_text(st_geometry(bbox_polygon))
 #Coordinate system:
 #UTM 32N (EPSG:32632)
 #Projected resolution: 18 m/px
+
+#ADD DATAMASK TO THE NEWLY DOWNLOADED IMAGES
+
+#---------------------------------------------------------------
+#Now we are trying to load the images in Tiff on R
+
+getwd()
+#"C:/Users/Tommy/Documents/altavaltellian"
+
+list.files()
+
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+tif_files_sorted <- sort(tif_files)  # Assumendo che l'ordine alfabetico rispecchi quello temporale
+
+
+#MOMENTO SMANETTONE
+# Carica il pacchetto raster
+library(raster)
+
+# Carica l'immagine .tiff
+image_path_trial <- "2022-06-25-00_00_2022-07-24-23_59_Sentinel-2_L2A_True_color.tiff"
+raster_image_trial <- raster(image_path_trial)
+
+image_path_trial2 <-"2022-06-25-00_00_2022-07-24-23_59_Sentinel-2_L2A_False_color.tiff"
+raster_image_trial2 <- raster(image_path_trial2)
+
+# Visualizza l'immagine
+plot(raster_image_trial, main = "Sentinel-2 True Color Image")
+
+#ESEMPIO DI COME ABBIAMO FATTO A LEZIONE MA VA FATTO CON LE BANDE
+difgr = raster_image_trial - raster_image_trial2
+plot(difgr)
+
+
+#ESEMPIO DI COME SOVRAPPORRE I PLOT
+
+# Trasforma le geometrie nel CRS del raster
+selected_municipalities <- st_transform(selected_municipalities, crs = crs(raster_image_trial))
+bbox_polygon <- st_transform(bbox_polygon, crs = crs(raster_image_trial))
+
+# Plot raster
+plot(raster_image_trial, main = "Sentinel-2 True Color Image")
+
+# Aggiungi geometrie
+plot(st_geometry(bbox_polygon), add = TRUE, border = "red", lwd = 2)
+plot(st_geometry(selected_municipalities), add = TRUE, 
+     col = NA, border = "blue")
+
