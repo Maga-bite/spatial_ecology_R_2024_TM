@@ -12,6 +12,20 @@
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
 library(geodata)    # for downloading administrative boundaries (GADM dataset)
 
+# Download the administrative boundaries of I# Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
+# Author: Tommaso Magarotto
+# Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
+# and climate data, aggregated by season over the last 5 years
+
+# The time period we will focus on is from 2019 to 2023. 
+# During this period, Italy experienced several extreme events, including droughts and floods. 
+# Our goal is to assess the impact of these extreme events on mountainous ecosystems, 
+# particularly in relation to their resilience and overall functioning.
+
+# Load required libraries
+library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
+library(geodata)    # for downloading administrative boundaries (GADM dataset)
+
 # Download the administrative boundaries of Italy - level 3 (i.e., municipalities)
 # 'level = 3' gives you the most detailed administrative unit (municipalities)
 # 'path = tempdir()' stores the data in a temporary directory
@@ -102,10 +116,73 @@ st_as_text(st_geometry(bbox_polygon))
 getwd()
 #"C:/Users/Tommy/Documents/altavaltellian"
 
+setwd("C:/Users/Tommy/Documents/altavaltellian")
+
 list.files()
 
 tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
 tif_files_sorted <- sort(tif_files)  # Assumendo che l'ordine alfabetico rispecchi quello temporale
+
+tif_true_color <- list.files(pattern = "\\True_color.tiff$", full.names = TRUE)
+
+tif_NDVI <- list.files(pattern = "\\NDVI.tiff$", full.names = TRUE)
+
+tif_false_color <- list.files(pattern = "\\False_color.tiff$", full.names = TRUE)
+
+
+# Trovi prima i file
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+tif_true_color <- tif_files[grepl("True_color.tiff$", tif_files)]
+tif_NDVI <- tif_files[grepl("NDVI.tiff$", tif_files)]
+tif_false_color <- tif_files[grepl("False_color.tiff$", tif_files)]
+
+# Poi crei i raster
+rasters_true_color <- lapply(tif_true_color, rast)
+rasters_NDVI <- lapply(tif_NDVI, rast)
+rasters_false_color <- lapply(tif_false_color, rast)
+
+#-----------------------------------------------------------------
+#NON HA FUNZIONATO
+
+library(raster)
+library(terra)
+
+# List all .tiff files in the current directory
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+
+# Filter files based on naming pattern
+tif_true_color  <- tif_files[grepl("True_color.tiff$", tif_files)]
+tif_NDVI        <- tif_files[grepl("NDVI.tiff$", tif_files)]
+tif_false_color <- tif_files[grepl("False_color.tiff$", tif_files)]
+
+# Load rasters using terra::rast()
+rasters_true_color  <- lapply(tif_true_color, rast)
+rasters_NDVI        <- lapply(tif_NDVI, rast)
+rasters_false_color <- lapply(tif_false_color, rast)
+
+# Plot the first 12 True Color rasters in a 3x4 grid
+par(mfrow = c(3, 4), mar = c(1, 1, 2, 1))
+for (i in 1:min(12, length(rasters_true_color))) {
+  plot(rasters_true_color[[i]], main = paste("Raster", i))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #MOMENTO SMANETTONE
