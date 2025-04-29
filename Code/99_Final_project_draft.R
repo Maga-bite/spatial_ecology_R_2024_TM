@@ -142,7 +142,16 @@ rasters_NDVI <- lapply(tif_NDVI, rast)
 rasters_false_color <- lapply(tif_false_color, rast)
 
 #-----------------------------------------------------------------
-#NON HA FUNZIONATO
+#Now we are trying to load the images in Tiff on R
+
+getwd()
+#"C:/Users/Tommy/Documents/altavaltellian"
+
+setwd("C:/Users/Tommy/Documents/altavaltellian")
+
+list.files()
+
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
 
 library(raster)
 library(terra)
@@ -150,21 +159,96 @@ library(terra)
 # List all .tiff files in the current directory
 tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
 
-# Filter files based on naming pattern
-tif_true_color  <- tif_files[grepl("True_color.tiff$", tif_files)]
-tif_NDVI        <- tif_files[grepl("NDVI.tiff$", tif_files)]
-tif_false_color <- tif_files[grepl("False_color.tiff$", tif_files)]
+# 2. Separa i file in base al nome
+tif_true_color <- tif_files[grepl("True_color", tif_files)]
+tif_NDVI <- tif_files[grepl("NDVI", tif_files)]
+tif_false_color <- tif_files[grepl("False_color", tif_files)]
 
-# Load rasters using terra::rast()
-rasters_true_color  <- lapply(tif_true_color, rast)
-rasters_NDVI        <- lapply(tif_NDVI, rast)
-rasters_false_color <- lapply(tif_false_color, rast)
+# 3. Crea liste di raster
+rasters_true_color <- lapply(tif_true_color, terra::rast)
+rasters_NDVI <- lapply(tif_NDVI, terra::rast)
+rasters_false_color <- lapply(tif_false_color, terra::rast)
 
-# Plot the first 12 True Color rasters in a 3x4 grid
-par(mfrow = c(3, 4), mar = c(1, 1, 2, 1))
-for (i in 1:min(12, length(rasters_true_color))) {
-  plot(rasters_true_color[[i]], main = paste("Raster", i))
+rasters_true_color[[1]]
+plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+# Fin qua funziona
+
+#___________________________________________________________
+
+
+#
+# VOLEVO CONTROLLARE SE IL BOUNDING BOX FUNZIONA CON LE IMMAGINI SCARICATE
+#
+
+# Load required libraries
+library(terra)    # For raster operations
+library(sf)       # For vector data handling
+library(ggplot2)  # For elegant spatial plotting
+
+# ---------------------------------------------
+# STEP 1: Logical Check - Intersections with all rasters
+# ---------------------------------------------
+
+# Get the CRS from one of the rasters (assuming all share the same CRS)
+crs_raster <- crs(rasters_true_color[[1]])
+
+# Ensure municipalities are projected to the raster's CRS
+selected_municipalities_proj <- st_transform(selected_municipalities, crs = crs_raster)
+
+# Logical check: loop over each raster and test intersection
+intersection_results <- sapply(seq_along(rasters_true_color), function(i) {
+  
+  # Convert raster to polygons (heavy operation!)
+  rast_poly <- as.polygons(rasters_true_color[[i]])
+  rast_poly_sf <- st_as_sf(rast_poly)
+  st_crs(rast_poly_sf) <- crs_raster
+  
+  # Check intersection
+  intersection <- st_intersects(
+    st_geometry(selected_municipalities_proj),
+    st_geometry(rast_poly_sf),sparse = FALSE)
+  
+  any(intersection)
+})
+
+# Show logical vector of which rasters intersect
+print(intersection_results)
+
+#print(intersection_results)
+#[1]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+
+
+# ---------------------------------------------
+# STEP 2: Plotting Example (only for the first intersecting raster)
+# ---------------------------------------------
+
+# Find the index of the first intersecting raster (if any)
+first_valid_index <- which(intersection_results)[1]
+
+if (!is.na(first_valid_index)) {
+  
+  # Convert that raster to polygons
+  example_raster <- rasters_true_color[[first_valid_index]]
+  rast_poly <- as.polygons(example_raster)
+  rast_poly_sf <- st_as_sf(rast_poly)
+  st_crs(rast_poly_sf) <- crs_raster
+  
+  # Plot with ggplot2 — EXAMPLE ONLY
+  ggplot() +
+    geom_sf(data = selected_municipalities_proj, aes(fill = "Municipalities"), 
+            color = "blue", alpha = 0.3) + 
+    geom_sf(data = rast_poly_sf, aes(fill = "Raster"), 
+            color = "red", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = paste("EXAMPLE - Raster", first_valid_index, "and Municipalities of Sondrio Province"),
+         subtitle = "Raster-to-polygon is computationally intensive — done only once here",
+         fill = "Legend") +
+    scale_fill_manual(values = c("Municipalities" = "blue", "Raster" = "red"))
+  
+} else {
+  message("No rasters intersect the selected municipalities.")
 }
+
 
 
 
