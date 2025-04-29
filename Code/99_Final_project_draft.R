@@ -171,10 +171,56 @@ rasters_false_color <- lapply(tif_false_color, terra::rast)
 
 rasters_true_color[[1]]
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+
 # Fin qua funziona
+# Now a check on the state of the tiff files and the possibility to plot them
+
+#
+rasters_files <- lapply(tif_files, terra::rast)
+
+for (i in seq_along(rasters_files)) {
+  cat("Plotting raster", i, "\n")
+  tryCatch({
+    plotRGB(rasters_files[[i]], r = 1, g = 2, b = 3, stretch = "lin")
+  }, error = function(e) {
+    cat("❌ Error in raster", i, ":", conditionMessage(e), "\n")
+  }, warning = function(w) {
+    cat("⚠️ Warning in raster", i, ":", conditionMessage(w), "\n")
+  })
+}
+
 
 #___________________________________________________________
 
+
+
+plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[9]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+
+
+for (i in seq_along(rasters_true_color)) {
+  cat("Plotting raster", i, "\n")
+  tryCatch({
+    plotRGB(rasters_true_color[[i]], r = 1, g = 2, b = 3, stretch = "lin")
+  }, error = function(e) {
+    cat("❌ Error in raster", i, ":", conditionMessage(e), "\n")
+  }, warning = function(w) {
+    cat("⚠️ Warning in raster", i, ":", conditionMessage(w), "\n")
+  })
+}
+
+
+
+#_______________________________________________________________________________
 
 #
 # VOLEVO CONTROLLARE SE IL BOUNDING BOX FUNZIONA CON LE IMMAGINI SCARICATE
@@ -248,10 +294,6 @@ if (!is.na(first_valid_index)) {
 } else {
   message("No rasters intersect the selected municipalities.")
 }
-
-
-
-
 
 
 
