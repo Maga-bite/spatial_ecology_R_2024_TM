@@ -1,26 +1,15 @@
 # Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
 # Author: Tommaso Magarotto
-# Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
-# and climate data, aggregated by season over the last 5 years
 
-# The time period we will focus on is from 2019 to 2023. 
+# Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
+# and climate data, aggregated by season over the last 3 years
+
+# The time period we will focus on is from 2022 to 2024
 # During this period, Italy experienced several extreme events, including droughts and floods. 
-# Our goal is to assess the impact of these extreme events on mountainous ecosystems, 
+# The goal is to assess the impact of these extreme events on mountainous ecosystems, 
 # particularly in relation to their resilience and overall functioning.
 
-# Load required libraries
-library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
-library(geodata)    # for downloading administrative boundaries (GADM dataset)
-
-# Download the administrative boundaries of I# Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
-# Author: Tommaso Magarotto
-# Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
-# and climate data, aggregated by season over the last 5 years
-
-# The time period we will focus on is from 2019 to 2023. 
-# During this period, Italy experienced several extreme events, including droughts and floods. 
-# Our goal is to assess the impact of these extreme events on mountainous ecosystems, 
-# particularly in relation to their resilience and overall functioning.
+# Download the administrative boundaries
 
 # Load required libraries
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
@@ -68,7 +57,7 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 # Export or print the bounding box in WKT (Well-Known Text) format
 # Useful for logging, sharing geometry in text form, or using in GIS software
 st_as_text(st_geometry(bbox_polygon))
-
+#"POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
 
 # Plant seasonal phases:
 
@@ -107,47 +96,15 @@ st_as_text(st_geometry(bbox_polygon))
 #Coordinate system:
 #UTM 32N (EPSG:32632)
 #Projected resolution: 18 m/px
-
-#ADD DATAMASK TO THE NEWLY DOWNLOADED IMAGES
-
-#---------------------------------------------------------------
-#Now we are trying to load the images in Tiff on R
-
-getwd()
-#"C:/Users/Tommy/Documents/altavaltellian"
-
-setwd("C:/Users/Tommy/Documents/altavaltellian")
-
-list.files()
-
-tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-tif_files_sorted <- sort(tif_files)  # Assumendo che l'ordine alfabetico rispecchi quello temporale
-
-tif_true_color <- list.files(pattern = "\\True_color.tiff$", full.names = TRUE)
-
-tif_NDVI <- list.files(pattern = "\\NDVI.tiff$", full.names = TRUE)
-
-tif_false_color <- list.files(pattern = "\\False_color.tiff$", full.names = TRUE)
-
-
-# Trovi prima i file
-tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-tif_true_color <- tif_files[grepl("True_color.tiff$", tif_files)]
-tif_NDVI <- tif_files[grepl("NDVI.tiff$", tif_files)]
-tif_false_color <- tif_files[grepl("False_color.tiff$", tif_files)]
-
-# Poi crei i raster
-rasters_true_color <- lapply(tif_true_color, rast)
-rasters_NDVI <- lapply(tif_NDVI, rast)
-rasters_false_color <- lapply(tif_false_color, rast)
+# Data mask
 
 #-----------------------------------------------------------------
 #Now we are trying to load the images in Tiff on R
 
+setwd("C:/Users/Tommy/Documents/altavaltellian")
+
 getwd()
 #"C:/Users/Tommy/Documents/altavaltellian"
-
-setwd("C:/Users/Tommy/Documents/altavaltellian")
 
 list.files()
 
@@ -158,6 +115,7 @@ library(terra)
 
 # List all .tiff files in the current directory
 tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+print(tif_files)
 
 # 2. Separa i file in base al nome
 tif_true_color <- tif_files[grepl("True_color", tif_files)]
@@ -172,7 +130,6 @@ rasters_false_color <- lapply(tif_false_color, terra::rast)
 rasters_true_color[[1]]
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 
-# Fin qua funziona
 # Now a check on the state of the tiff files and the possibility to plot them
 
 #
@@ -189,22 +146,94 @@ for (i in seq_along(rasters_files)) {
   })
 }
 
+#this cycle of commands plots even the single bands so it can be seen which are critical
 
-#___________________________________________________________
+for (i in seq_along(rasters_files)) {
+  cat("Plotting raster", i, "\n")
+  tryCatch({
+    plot(rasters_files[[i]], stretch = "lin")
+  }, error = function(e) {
+    cat("Error in raster", i, ":", conditionMessage(e), "\n")
+  }, warning = function(w) {
+    cat("Warning in raster", i, ":", conditionMessage(w), "\n")
+  
+}
 
+# Indici dei raster corrotti e che vanno scaricati perchè presentano warnings
+corrupted_indices <- c(13, 16:19, 21, 22, 24, 34, 36, 49:58, 60, 72, 99, 100, 104:106)
 
+# Ottieni la lista completa dei file (come li avevi caricati)
+files <- list.files("C:/Users/Tommy/Documents/altavaltellian", pattern = "\\.tiff$", full.names = TRUE)
 
-plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[9]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+# Estrai i nomi dei file corrotti
+corrupted_files <- files[corrupted_indices]
+
+# Stampali
+corrupted_files
+
+## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
+# Critical date ranges and required bands/composites:
+# - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
+# - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
+# - 2024-05-10 to 2024-06-09: Bands B04, B05, B12, B8A + False_color composite
+
+#_______________________________________________________________________________
+
+#si riescono a plottare tutti, in alcuni mostra un multiframe in cui c'è il plot e la zona di raster
+#ora provo a vedere se i raster dei file creano ancora problemi se vengono rivisti dal seguente cosice
+
+# Percorso dell'eseguibile gdal_translate
+gdal_path <- "C:/2)UNIBO/roba strana per dati tiff/bin/gdal_translate.exe"
+
+# Cartella dove sono i file .tiff originali
+input_dir <- "C:/Users/Tommy/Documents/altavaltellian"
+
+# Cartella dove salvare i file riparati
+output_dir <- file.path(input_dir, "riparati")
+
+# Crea la cartella di output se non esiste
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+}
+
+# Lista dei file .tiff da convertire
+tif_files <- list.files(input_dir, pattern = "\\.tiff$", full.names = TRUE)
+
+# Ciclo su tutti i file e li converte
+for (file in tif_files) {
+  filename <- basename(file)
+  output_file <- file.path(output_dir, paste0("fix_", filename))
+  
+  cmd <- sprintf('"%s" "%s" "%s"', gdal_path, file, output_file)
+  cat("➡️ Eseguendo:", cmd, "\n")
+  
+  status <- system(cmd)
+  if (status != 0) {
+    cat("Errore nel convertire:", filename, "\n")
+  } else {
+    cat("Fatto:", filename, "\n")
+  }
+}
+
+#non ha funzionato quindi vanno riscaricati
+
+#_______________________________________________________________________________
+
+par(mfrow=c(3,4))
+plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[9]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[10]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[11]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_NDVI[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+#FUNZIONA QUESTI SONO TUTTI I RASTER NDVI DEI 3 ANNI
+
 
 
 for (i in seq_along(rasters_true_color)) {
@@ -212,11 +241,66 @@ for (i in seq_along(rasters_true_color)) {
   tryCatch({
     plotRGB(rasters_true_color[[i]], r = 1, g = 2, b = 3, stretch = "lin")
   }, error = function(e) {
-    cat("❌ Error in raster", i, ":", conditionMessage(e), "\n")
+    cat("Error in raster", i, ":", conditionMessage(e), "\n")
   }, warning = function(w) {
-    cat("⚠️ Warning in raster", i, ":", conditionMessage(w), "\n")
+    cat("Warning in raster", i, ":", conditionMessage(w), "\n")
   })
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -295,21 +379,82 @@ if (!is.na(first_valid_index)) {
   message("No rasters intersect the selected municipalities.")
 }
 
+#_______________________________________________________________________________
+
+#
+# VOLEVO CONTROLLARE SE IL BOUNDING BOX FUNZIONA CON LE IMMAGINI SCARICATE
+#
+
+# Load required libraries
+library(terra)    # For raster operations
+library(sf)       # For vector data handling
+library(ggplot2)  # For elegant spatial plotting
+
+# ---------------------------------------------
+# STEP 1: Logical Check - Intersections with all rasters
+# ---------------------------------------------
+
+# Get the CRS from one of the rasters (assuming all share the same CRS)
+crs_raster <- crs(rasters_true_color[[1]])
+
+# Ensure municipalities are projected to the raster's CRS
+selected_municipalities_proj <- st_transform(selected_municipalities, crs = crs_raster)
+
+# Logical check: loop over each raster and test intersection
+intersection_results <- sapply(seq_along(rasters_true_color), function(i) {
+  
+  # Convert raster to polygons (heavy operation!)
+  rast_poly <- as.polygons(rasters_true_color[[i]])
+  rast_poly_sf <- st_as_sf(rast_poly)
+  st_crs(rast_poly_sf) <- crs_raster
+  
+  # Check intersection
+  intersection <- st_intersects(
+    st_geometry(selected_municipalities_proj),
+    st_geometry(rast_poly_sf),sparse = FALSE)
+  
+  any(intersection)
+})
+
+# Show logical vector of which rasters intersect
+print(intersection_results)
+
+#print(intersection_results)
+#[1]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
 
 
+# ---------------------------------------------
+# STEP 2: Plotting Example (only for the first intersecting raster)
+# ---------------------------------------------
 
+# Find the index of the first intersecting raster (if any)
+first_valid_index <- which(intersection_results)[1]
 
+if (!is.na(first_valid_index)) {
+  
+  # Convert that raster to polygons
+  example_raster <- rasters_true_color[[first_valid_index]]
+  rast_poly <- as.polygons(example_raster)
+  rast_poly_sf <- st_as_sf(rast_poly)
+  st_crs(rast_poly_sf) <- crs_raster
+  
+  # Plot with ggplot2 — EXAMPLE ONLY
+  ggplot() +
+    geom_sf(data = selected_municipalities_proj, aes(fill = "Municipalities"), 
+            color = "blue", alpha = 0.3) + 
+    geom_sf(data = rast_poly_sf, aes(fill = "Raster"), 
+            color = "red", alpha = 0.1) +
+    theme_minimal() +
+    labs(title = paste("EXAMPLE - Raster", first_valid_index, "and Municipalities of Sondrio Province"),
+         subtitle = "Raster-to-polygon is computationally intensive — done only once here",
+         fill = "Legend") +
+    scale_fill_manual(values = c("Municipalities" = "blue", "Raster" = "red"))
+  
+} else {
+  message("No rasters intersect the selected municipalities.")
+}
 
-
-
-
-
-
-
-
-
-
-
+#_______________________________________________________________________________
 
 #MOMENTO SMANETTONE
 # Carica il pacchetto raster
@@ -329,6 +474,7 @@ plot(raster_image_trial, main = "Sentinel-2 True Color Image")
 difgr = raster_image_trial - raster_image_trial2
 plot(difgr)
 
+#_______________________________________________________________________________
 
 #ESEMPIO DI COME SOVRAPPORRE I PLOT
 
