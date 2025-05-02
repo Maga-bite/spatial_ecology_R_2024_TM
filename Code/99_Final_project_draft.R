@@ -61,7 +61,7 @@ st_as_text(st_geometry(bbox_polygon))
 
 # Plant seasonal phases:
 
-# Avoiding the dormancy period cause NDVI dosen't see the photosynthetic activity since it's too low or even absent
+# Avoiding the dormancy period because NDVI dosen't see the photosynthetic activity since it's too low or even absent
 
 # Vegetative awakening (Spring): May 10 – June 9
 # During this phase, the first leaves start to appear, with flowering and the beginning of growth. 
@@ -98,7 +98,8 @@ st_as_text(st_geometry(bbox_polygon))
 #Projected resolution: 18 m/px
 # Data mask
 
-#-----------------------------------------------------------------
+#_______________________________________________________________________________
+
 #Now we are trying to load the images in Tiff on R
 
 setwd("C:/Users/Tommy/Documents/altavaltellian")
@@ -132,92 +133,47 @@ plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 
 # Now a check on the state of the tiff files and the possibility to plot them
 
-#
+#raster of all the files
 rasters_files <- lapply(tif_files, terra::rast)
 
-for (i in seq_along(rasters_files)) {
-  cat("Plotting raster", i, "\n")
-  tryCatch({
-    plotRGB(rasters_files[[i]], r = 1, g = 2, b = 3, stretch = "lin")
-  }, error = function(e) {
-    cat("❌ Error in raster", i, ":", conditionMessage(e), "\n")
-  }, warning = function(w) {
-    cat("⚠️ Warning in raster", i, ":", conditionMessage(w), "\n")
-  })
-}
+rasters_files
+
+#_______________________________________________________________________________
 
 #this cycle of commands plots even the single bands so it can be seen which are critical
+#the plots that gives a warning or an error are re-downloaded but there are images that are not being downloaded correclty for their composites
 
 for (i in seq_along(rasters_files)) {
   cat("Plotting raster", i, "\n")
   tryCatch({
-    plot(rasters_files[[i]], stretch = "lin")
+  plot(rasters_files[[i]], stretch = "lin")
   }, error = function(e) {
-    cat("Error in raster", i, ":", conditionMessage(e), "\n")
-  }, warning = function(w) {
-    cat("Warning in raster", i, ":", conditionMessage(w), "\n")
-  
-}
+  cat("Xo Error in raster", i, ":", conditionMessage(e), "\n")
+ }, warning = function(w) {
+   cat(":O Warning in raster", i, ":", conditionMessage(w), "\n")
+   })
+  }
+
 
 # Indici dei raster corrotti e che vanno scaricati perchè presentano warnings
 corrupted_indices <- c(13, 16:19, 21, 22, 24, 34, 36, 49:58, 60, 72, 99, 100, 104:106)
-
+  
 # Ottieni la lista completa dei file (come li avevi caricati)
 files <- list.files("C:/Users/Tommy/Documents/altavaltellian", pattern = "\\.tiff$", full.names = TRUE)
-
+  
 # Estrai i nomi dei file corrotti
 corrupted_files <- files[corrupted_indices]
-
-# Stampali
 corrupted_files
-
+  
 ## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
 # Critical date ranges and required bands/composites:
 # - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
 # - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
 # - 2024-05-10 to 2024-06-09: Bands B04, B05, B12, B8A + False_color composite
+# Now that the rasters are mostly working,g we need to load and create the composite rasters that are not being downloaded correctly
 
 #_______________________________________________________________________________
 
-#si riescono a plottare tutti, in alcuni mostra un multiframe in cui c'è il plot e la zona di raster
-#ora provo a vedere se i raster dei file creano ancora problemi se vengono rivisti dal seguente cosice
-
-# Percorso dell'eseguibile gdal_translate
-gdal_path <- "C:/2)UNIBO/roba strana per dati tiff/bin/gdal_translate.exe"
-
-# Cartella dove sono i file .tiff originali
-input_dir <- "C:/Users/Tommy/Documents/altavaltellian"
-
-# Cartella dove salvare i file riparati
-output_dir <- file.path(input_dir, "riparati")
-
-# Crea la cartella di output se non esiste
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir)
-}
-
-# Lista dei file .tiff da convertire
-tif_files <- list.files(input_dir, pattern = "\\.tiff$", full.names = TRUE)
-
-# Ciclo su tutti i file e li converte
-for (file in tif_files) {
-  filename <- basename(file)
-  output_file <- file.path(output_dir, paste0("fix_", filename))
-  
-  cmd <- sprintf('"%s" "%s" "%s"', gdal_path, file, output_file)
-  cat("➡️ Eseguendo:", cmd, "\n")
-  
-  status <- system(cmd)
-  if (status != 0) {
-    cat("Errore nel convertire:", filename, "\n")
-  } else {
-    cat("Fatto:", filename, "\n")
-  }
-}
-
-#non ha funzionato quindi vanno riscaricati
-
-#_______________________________________________________________________________
 
 par(mfrow=c(3,4))
 plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -234,18 +190,206 @@ plotRGB(rasters_NDVI[[11]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_NDVI[[12]], r = 1, g = 2, b = 3, stretch = "lin")
 #FUNZIONA QUESTI SONO TUTTI I RASTER NDVI DEI 3 ANNI
 
+#_______________________________________________________________________________
 
+par(mfrow=c(3,4))
+plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+  plotRGB(rasters_false_color[[3]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+  plotRGB(rasters_false_color[[9]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
 
-for (i in seq_along(rasters_true_color)) {
-  cat("Plotting raster", i, "\n")
-  tryCatch({
-    plotRGB(rasters_true_color[[i]], r = 1, g = 2, b = 3, stretch = "lin")
-  }, error = function(e) {
-    cat("Error in raster", i, ":", conditionMessage(e), "\n")
-  }, warning = function(w) {
-    cat("Warning in raster", i, ":", conditionMessage(w), "\n")
-  })
+# 3-----------------------------------------------------------------------------
+rasters_false_color[[3]]
+#source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_False_color.tiff
+
+# 9-----------------------------------------------------------------------------
+rasters_false_color[[9]]
+#source: 2024-05-10-00_00_2024-06-09-23_59_Sentinel-2_L2A_False_color.tiff
+
+dev.off()
+
+#_______________________________________________________________________________
+
+par(mfrow=c(3,4))
+plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+  plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
+plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+  plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
+plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+  plotRGB(rasters_true_color[[9]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
+plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+
+# working on the natural color trough the bands
+
+# 3-----------------------------------------------------------------------------
+rasters_true_color[[3]]
+#source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_True_color.tiff
+names(rasters_files[[25]])
+names(rasters_files[[26]])
+names(rasters_files[[27]])
+
+# loading rasters corresponding to the bands of true color
+b2_2289_2299 <- rasters_files[[25]][[1]]  # Blu
+b3_2289_2299 <- rasters_files[[26]][[1]]  # Verde
+b4_2289_2299 <- rasters_files[[27]][[1]]  # Rosso
+
+# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+red_2289_2299 <- b4_2289_2299[[1]]
+green_2289_2299 <- b3_2289_2299[[1]]
+blue_2289_2299 <- b2_2289_2299[[1]]
+
+# Stack delle bande RGB
+true_color_2289_2299 <- c(red_2289_2299, green_2289_2299, blue_2289_2299)
+
+# Plot RGB
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
+
+#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
+plot_truecolor_3 <- plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+
+# 6-----------------------------------------------------------------------------
+rasters_true_color[[6]]
+#source: 2023-06-25-00_00_2023-07-25-23_59_Sentinel-2_L2A_True_color.tiff 
+names(rasters_files[[61]])
+names(rasters_files[[62]])
+names(rasters_files[[63]])
+
+# loading rasters corresponding to the bands of true color
+b2_23625_23725 <- rasters_files[[61]][[1]]  # Blu
+b3_23625_23725 <- rasters_files[[62]][[1]]  # Verde
+b4_23625_23725 <- rasters_files[[63]][[1]]  # Rosso
+
+# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+red_23625_23725 <- b4_23625_23725[[1]]
+green_23625_23725 <- b3_23625_23725[[1]]
+blue_23625_23725 <- b2_23625_23725[[1]]
+
+# Stack delle bande RGB
+true_color_23625_23725 <- c(red_23625_23725, green_23625_23725, blue_23625_23725)
+
+# Plot RGB
+plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
+
+#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
+plot_truecolor_6 <- plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+
+# 9-----------------------------------------------------------------------------
+rasters_true_color[[9]]
+#source: 2024-05-10-00_00_2024-06-09-23_59_Sentinel-2_L2A_True_color.tiff 
+names(rasters_files[[97]])
+names(rasters_files[[98]])
+names(rasters_files[[99]])
+
+# loading rasters corresponding to the bands of true color
+b2_24510_2469 <- rasters_files[[97]][[1]]  # Blu
+b3_24510_2469 <- rasters_files[[98]][[1]]  # Verde
+b4_24510_2469 <- rasters_files[[99]][[1]]  # Rosso
+
+# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+red_24510_2469 <- b4_24510_2469[[1]]
+green_24510_2469 <- b3_24510_2469[[1]]
+blue_24510_2469 <- b2_24510_2469[[1]]
+
+# Stack delle bande RGB
+true_color_24510_2469 <- c(red_24510_2469, green_24510_2469, blue_24510_2469)
+
+# Plot RGB
+plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
+
+#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
+plot_truecolor_9 <- plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+
+# Final multiframe for True color
+par(mfrow=c(3,4))
+plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+#we made it and 
+
+dev.off()
+#_______________________________________________________________________________
+
+#cosa che sarebbe stata utile ma non ha funzionato
+
+#si riescono a plottare tutti, in alcuni mostra un multiframe in cui c'è il plot e la zona di raster
+#ora provo a vedere se i raster dei file creano ancora problemi se vengono rivisti dal seguente cosice
+  
+# Percorso dell'eseguibile gdal_translate
+gdal_path <- "C:/2)UNIBO/roba strana per dati tiff/bin/gdal_translate.exe"
+  
+# Cartella dove sono i file .tiff originali
+input_dir <- "C:/Users/Tommy/Documents/altavaltellian"
+  
+# Cartella dove salvare i file riparati
+output_dir <- file.path(input_dir, "riparati")
+  
+# Crea la cartella di output se non esiste
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
 }
+  
+# Lista dei file .tiff da convertire
+tif_files <- list.files(input_dir, pattern = "\\.tiff$", full.names = TRUE)
+  
+# Ciclo su tutti i file e li converte
+for (file in tif_files) {
+  filename <- basename(file)
+  output_file <- file.path(output_dir, paste0("fix_", filename))
+    
+  cmd <- sprintf('"%s" "%s" "%s"', gdal_path, file, output_file)
+  cat("➡️ Eseguendo:", cmd, "\n")
+    
+  status <- system(cmd)
+  if (status != 0) {
+    cat("Errore nel convertire:", filename, "\n")
+  } else {
+    cat("Fatto:", filename, "\n")
+  }
+}
+  
+#non ha funzionato quindi vanno riscaricati
+  
+#_______________________________________________________________________________
+  
+
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
 
 
