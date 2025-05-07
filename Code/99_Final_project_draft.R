@@ -11,6 +11,7 @@
 
 # Download the administrative boundaries
 
+
 # Load required libraries
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
 library(geodata)    # for downloading administrative boundaries (GADM dataset)
@@ -59,6 +60,8 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 st_as_text(st_geometry(bbox_polygon))
 #"POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
 
+
+
 # Plant seasonal phases:
 
 # Avoiding the dormancy period because NDVI dosen't see the photosynthetic activity since it's too low or even absent
@@ -79,14 +82,14 @@ st_as_text(st_geometry(bbox_polygon))
 # The selected time intervals for each phase correspond to approximately 30 days, representing the critical periods of 
 # plant growth, stress, and senescence. These will be used to analyze the impact of drought on vegetation over the years. 
 # This approach helps monitor the seasonal evolution of NDVI and identify anomalies related to extreme events (drought, floods) 
-# observed in Italy between 2022 and 2024.
+# observed in Italy between 2022 and 2023.
 
 
 #Image format:
 
 #In sintesi:
 #Usa i layer: True Color, NDVI, False Color (urban)
-#Scarica B04, B08, B02, B03, B11, B12
+#Scarica B03, B04, B05, B06 B08, B08A B11, B12
 #Risoluzione: 10 m dove possibile
 
 
@@ -154,27 +157,15 @@ for (i in seq_along(rasters_files)) {
   })
 }
 
-
-# Indici dei raster corrotti e che vanno scaricati perchè presentano warnings
-corrupted_indices <- c(13, 16:19, 21, 22, 24, 34, 36, 49:58, 60, 72, 99, 100, 104:106)
-
-# Ottieni la lista completa dei file (come li avevi caricati)
-files <- list.files("C:/Users/Tommy/Documents/altavaltellian", pattern = "\\.tiff$", full.names = TRUE)
-
-# Estrai i nomi dei file corrotti
-corrupted_files <- files[corrupted_indices]
-corrupted_files
-
 ## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
 # Critical date ranges and required bands/composites:
 # - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
 # - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
-# - 2024-05-10 to 2024-06-09: Bands B04, B05, B12, B8A + False_color composite
 # Now that the rasters are mostly working,g we need to load and create the composite rasters that are not being downloaded correctly
 
 #_______________________________________________________________________________
 
-par(mfrow=c(3,4))
+par(mfrow=c(2,4))
 plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -184,14 +175,12 @@ plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
 
-plotRGB(rasters_NDVI[[9]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[10]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[11]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[12]], r = 1, g = 2, b = 3, stretch = "lin")
+dev.off()
+
 
 #_______________________________________________________________________________
 
-par(mfrow=c(3,4))
+par(mfrow=c(2,4))
 plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_false_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error
@@ -200,11 +189,6 @@ plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-plotRGB(rasters_false_color[[9]], r = 1, g = 2, b = 3, stretch = "lin") #error
-plotRGB(rasters_false_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
 
 # 3-----------------------------------------------------------------------------
 rasters_false_color[[3]]
@@ -229,40 +213,20 @@ false_color_2289_2299 <- c(nir_2289_2299, red_2289_2299, green_2289_2299)
 # Plot false color maxcell=inf serve per forzare a usare tutti i pixel. 
 plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
 
-# 9-----------------------------------------------------------------------------
-rasters_false_color[[9]]
-#source: 2024-05-10-00_00_2024-06-09-23_59_Sentinel-2_L2A_False_color.tiff
 
-names(rasters_files[[98]])
-names(rasters_files[[99]])
-names(rasters_files[[100]])
-
-# Caricamento dei raster corrispondenti alle bande per il false color
-b4_240510_240609 <- rasters_files[[98]][[1]] # Rosso
-b3_240510_240609 <- rasters_files[[99]][[1]] # Verde
-b5_240510_240609 <- rasters_files[[100]][[1]] # Infrarosso vicino (NIR)
-
-# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
-nir_240510_240609 <- b5_240510_240609[[1]]
-red_240510_240609 <- b4_240510_240609[[1]]
-green_240510_240609 <- b3_240510_240609[[1]]
-
-plot(nir_240510_240609)
-plot(green_24510_2469)
-plot(red_24510_2469)
-
-# Stack delle bande per il false color
-false_color_240510_240609 <- c(nir_240510_240609, red_240510_240609, green_240510_240609)
-
-# Plot false color maxcell=inf serve per forzare a usare tutti i pixel.
-plotRGB(false_color_240510_240609, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
-
-
-dev.off()
+par(mfrow=c(2,4))
+plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
+plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
 
 #_______________________________________________________________________________
 
-par(mfrow=c(3,4))
+par(mfrow=c(2,4))
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
@@ -271,12 +235,10 @@ plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
 plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[9]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
-plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
 
 # working on the natural color trough the bands
+
+dev.off()
 
 # 3-----------------------------------------------------------------------------
 rasters_true_color[[3]]
@@ -330,34 +292,10 @@ plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale=10000, stretch = "his
 #maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
 plot_truecolor_6 <- plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 
-# 9-----------------------------------------------------------------------------
-rasters_true_color[[9]]
-#source: 2024-05-10-00_00_2024-06-09-23_59_Sentinel-2_L2A_True_color.tiff 
-names(rasters_files[[97]])
-names(rasters_files[[98]])
-names(rasters_files[[99]])
-
-# loading rasters corresponding to the bands of true color
-b2_24510_2469 <- rasters_files[[97]][[1]]  # Blu
-b3_24510_2469 <- rasters_files[[98]][[1]]  # Verde
-b4_24510_2469 <- rasters_files[[99]][[1]]  # Rosso
-
-# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
-red_24510_2469 <- b4_24510_2469[[1]]
-green_24510_2469 <- b3_24510_2469[[1]]
-blue_24510_2469 <- b2_24510_2469[[1]]
-
-# Stack delle bande RGB
-true_color_24510_2469 <- c(red_24510_2469, green_24510_2469, blue_24510_2469)
-
-# Plot RGB
-plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
-
-#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
-plot_truecolor_9 <- plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+dev.off()
 
 # Final multiframe for True color
-par(mfrow=c(3,4))
+par(mfrow=c(2,4))
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
@@ -366,22 +304,126 @@ plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(true_color_24510_2469, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-plotRGB(rasters_true_color[[10]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[11]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[12]], r = 1, g = 2, b = 3, stretch = "lin")
-#we made it and 
+
+
+#_______________________________________________________________________________
+
+# True Color Final
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))  # Margini e layout
+
+# 2022
+plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 1)
+mtext("2022", side = 2, line = 2, cex = 1.3, las = 3)
+plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+mtext("08.09–09.09", side = 3, line = 1, cex = 1)
+plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 1)
+
+# 2023
+plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 1)
+mtext("2023", side = 2, line = 2, cex = 1.3, las = 3)
+plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("08.09–09.09", side = 3, line = 1, cex = 1)
+plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 1)
+
+# General title
+mtext("True Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 
 dev.off()
 
 
+#False color final
+
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
+
+# 2022
+plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 1)
+mtext("2022", side = 2, line = 2, cex = 1.3, las = 3)
+plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
+mtext("08.09–09.09", side = 3, line = 1, cex = 1)
+plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 1)
+
+# 2023
+plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 1)
+mtext("2023", side = 2, line = 2, cex = 1.3, las = 3)
+plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("08.09–09.09", side = 3, line = 1, cex = 1)
+plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 1)
+
+# General title
+mtext("False Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
+
+dev.off()
 
 
+#NDVI
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
 
+# 2022
+plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 0.8)
+mtext("2022", side = 2, line = 2, cex = 1, las = 3)
+plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("06.25–07.24", side = 3, line = 1, cex = 0.8)
+plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("08.09–09.09", side = 3, line = 1, cex = 0.8)
+plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 0.8)
 
+# 2023
+plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("05.10–06.09", side = 3, line = 1, cex = 0.8)
+mtext("2023", side = 2, line = 2, cex = 0.9, las = 3)
+plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("06.25–07.24", side = 3, line = 1, cex = 0.8)
+plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("08.09–09.09", side = 3, line = 1, cex = 0.8)
+plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+mtext("09.25–10.25", side = 3, line = 1, cex = 0.8)
+
+# General title
+mtext("NDVI RGB Composite", outer = TRUE, side = 3, line = 1, cex = 1.2)
+
+dev.off()
+
+#we made it and 
+
+#_______________________________________________________________________________
 
 
 #ok now we have to progress further with the analysis
+
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+
+library(raster)
+library(terra)
+
+# List all .tiff files in the current directory
+tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
+print(tif_files)
+
+tif_B04 <- tif_files[grepl("B04", tif_files)]
+tif_B08 <- tif_files[grepl("B08", tif_files)]
+tif_B11 <- tif_files[grepl("B11", tif_files)]
+
+rasters_tif_B04 <- lapply(tif_B04, terra::rast)
+rasters_tif_B08 <- lapply(tif_B08, terra::rast)
+rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 
 # Required bands for analysis:
 # - NDVI (Normalized Difference Vegetation Index):
@@ -389,6 +431,7 @@ dev.off()
 #   - Formula: NDVI = (NIR - Red) / (NIR + Red)
 #   - Used to assess vegetation health.
 #   - NDVI may already be present in the files, but it can be recalculated if needed.
+
 
 # - NDWI (Normalized Difference Water Index):
 #   - NIR (Band 8) and SWIR1 (Band 11)
@@ -406,26 +449,30 @@ names(rasters_files)
 
 
 
-par(mfrow=c(2,4))
-
-plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
 
 
-plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
-plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #_______________________________________________________________________________
