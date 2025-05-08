@@ -316,7 +316,7 @@ plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 1)
 mtext("2022", side = 2, line = 2, cex = 1.3, las = 3)
 plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+mtext("06.25–07.25", side = 3, line = 1, cex = 1)
 plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 mtext("08.09–09.09", side = 3, line = 1, cex = 1)
 plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -327,7 +327,7 @@ plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 1)
 mtext("2023", side = 2, line = 2, cex = 1.3, las = 3)
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+mtext("06.25–07.25", side = 3, line = 1, cex = 1)
 plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("08.09–09.09", side = 3, line = 1, cex = 1)
 plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -348,7 +348,7 @@ plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 1)
 mtext("2022", side = 2, line = 2, cex = 1.3, las = 3)
 plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+mtext("06.25–07.25", side = 3, line = 1, cex = 1)
 plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
 mtext("08.09–09.09", side = 3, line = 1, cex = 1)
 plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -359,7 +359,7 @@ plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 1)
 mtext("2023", side = 2, line = 2, cex = 1.3, las = 3)
 plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-mtext("06.25–07.24", side = 3, line = 1, cex = 1)
+mtext("06.25–07.25", side = 3, line = 1, cex = 1)
 plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("08.09–09.09", side = 3, line = 1, cex = 1)
 plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -379,7 +379,7 @@ plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 0.8)
 mtext("2022", side = 2, line = 2, cex = 1, las = 3)
 plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-mtext("06.25–07.24", side = 3, line = 1, cex = 0.8)
+mtext("06.25–07.25", side = 3, line = 1, cex = 0.8)
 plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("08.09–09.09", side = 3, line = 1, cex = 0.8)
 plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -390,7 +390,7 @@ plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("05.10–06.09", side = 3, line = 1, cex = 0.8)
 mtext("2023", side = 2, line = 2, cex = 0.9, las = 3)
 plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-mtext("06.25–07.24", side = 3, line = 1, cex = 0.8)
+mtext("06.25–07.25", side = 3, line = 1, cex = 0.8)
 plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
 mtext("08.09–09.09", side = 3, line = 1, cex = 0.8)
 plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -425,6 +425,11 @@ rasters_tif_B04 <- lapply(tif_B04, terra::rast)
 rasters_tif_B08 <- lapply(tif_B08, terra::rast)
 rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 
+#05102*_06092* → dal 10 maggio al 9 giugno
+#06252*_07252* → dal 25 giugno al 25 luglio
+#08092*_09092* → dal 9 agosto al 9 settembre
+#09252*_10252* → dal 25 settembre al 25 ottobre
+
 # Required bands for analysis:
 # - NDVI (Normalized Difference Vegetation Index):
 #   - Red (Band 4) and NIR (Band 8)
@@ -432,6 +437,62 @@ rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 #   - Used to assess vegetation health.
 #   - NDVI may already be present in the files, but it can be recalculated if needed.
 
+# red band (B04)
+redband04_051022_060922 <- rasters_tif_B04[[1]]
+redband04_062522_072522 <- rasters_tif_B04[[2]]
+redband04_080922_090922 <- rasters_tif_B04[[3]]
+redband04_092522_102522 <- rasters_tif_B04[[4]]
+
+redband04_051023_060923 <- rasters_tif_B04[[5]]
+redband04_062523_072523 <- rasters_tif_B04[[6]]
+redband04_080923_090923 <- rasters_tif_B04[[7]]
+redband04_092523_102523 <- rasters_tif_B04[[8]]
+
+# NIR band (B08)
+nirband08_051022_060922 <- rasters_tif_B08[[1]]
+nirband08_062522_072522 <- rasters_tif_B08[[2]]
+nirband08_080922_090922 <- rasters_tif_B08[[3]]
+nirband08_092522_102522 <- rasters_tif_B08[[4]]
+
+nirband08_051023_060923 <- rasters_tif_B08[[5]]
+nirband08_062523_072523 <- rasters_tif_B08[[6]]
+nirband08_080923_090923 <- rasters_tif_B08[[7]]
+nirband08_092523_102523 <- rasters_tif_B08[[8]]
+
+# SWIR band (B11)
+swirband11_051022_060922 <- rasters_tif_B11[[1]]
+swirband11_062522_072522 <- rasters_tif_B11[[2]]
+swirband11_080922_090922 <- rasters_tif_B11[[3]]
+swirband11_092522_102522 <- rasters_tif_B11[[4]]
+
+swirband11_051023_060923 <- rasters_tif_B11[[5]]
+swirband11_062523_072523 <- rasters_tif_B11[[6]]
+swirband11_080923_090923 <- rasters_tif_B11[[7]]
+swirband11_092523_102523 <- rasters_tif_B11[[8]]
+
+#NDVI = (NIR - Red) / (NIR + Red)
+# NDVI 2022
+NDVI_051022_060922 <- (nirband08_051022_060922 - redband04_051022_060922) / (nirband08_051022_060922 + redband04_051022_060922)
+NDVI_062522_072522 <- (nirband08_062522_072522 - redband04_062522_072522) / (nirband08_062522_072522 + redband04_062522_072522)
+NDVI_080922_090922 <- (nirband08_080922_090922 - redband04_080922_090922) / (nirband08_080922_090922 + redband04_080922_090922)
+NDVI_092522_102522 <- (nirband08_092522_102522 - redband04_092522_102522) / (nirband08_092522_102522 + redband04_092522_102522)
+
+# NDVI 2023
+NDVI_051023_060923 <- (nirband08_051023_060923 - redband04_051023_060923) / (nirband08_051023_060923 + redband04_051023_060923)
+NDVI_062523_072523 <- (nirband08_062523_072523 - redband04_062523_072523) / (nirband08_062523_072523 + redband04_062523_072523)
+NDVI_080923_090923 <- (nirband08_080923_090923 - redband04_080923_090923) / (nirband08_080923_090923 + redband04_080923_090923)
+NDVI_092523_102523 <- (nirband08_092523_102523 - redband04_092523_102523) / (nirband08_092523_102523 + redband04_092523_102523)
+
+cl <- colorRampPalette(c("brown", "yellow", "green"))(100)
+plot(NDVI_051022_060922[1], col = cl, main = "NDVI 05.10–06.09 2022")
+plot(NDVI_062522_072522, col = cl, main = "NDVI 06.25–07.25 2022")
+plot(NDVI_080922_090922, col = cl, main = "NDVI 08.09–09.09 2022")
+plot(NDVI_092522_102522, col = cl, main = "NDVI 09.25–10.25 2022")
+
+plot(NDVI_051023_060923, col = cl, main = "NDVI 05.10–06.09 2023")
+plot(NDVI_062523_072523, col = cl, main = "NDVI 06.25–07.25 2023")
+plot(NDVI_080923_090923, col = cl, main = "NDVI 08.09–09.09 2023")
+plot(NDVI_092523_102523, col = cl, main = "NDVI 09.25–10.25 2023")
 
 # - NDWI (Normalized Difference Water Index):
 #   - NIR (Band 8) and SWIR1 (Band 11)
@@ -440,8 +501,6 @@ rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 
 # The results of NDVI and NDWI are used to analyze vegetation health, water stress, and drought effects.
 
-rasters_files
-names(rasters_files)
 
 
 
