@@ -457,11 +457,20 @@ plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
 plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
-
 dev.off()
 
+difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
+difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
+#Errore: [-] extents do not match
+difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
+difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
 
-
+# Visualizzazione delle mappe di differenza in griglia 2x2
+par(mfrow = c(2, 2))
+plot(difNDWI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
+plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
+plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
+plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
 
 
