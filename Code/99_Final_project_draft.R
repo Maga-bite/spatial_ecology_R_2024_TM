@@ -11,10 +11,12 @@
 
 # Download the administrative boundaries
 
-
 # Load required libraries
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
 library(geodata)    # for downloading administrative boundaries (GADM dataset)
+# Palette viridis
+library(viridis)
+clv <- viridis(100)
 
 # Download the administrative boundaries of Italy - level 3 (i.e., municipalities)
 # 'level = 3' gives you the most detailed administrative unit (municipalities)
@@ -60,7 +62,7 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 st_as_text(st_geometry(bbox_polygon))
 #"POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
 
-
+#_______________________________________________________________________________
 
 # Plant seasonal phases:
 
@@ -92,7 +94,6 @@ st_as_text(st_geometry(bbox_polygon))
 #Scarica B03, B04, B05, B06 B08, B08A B11, B12
 #Risoluzione: 10 m dove possibile
 
-
 #TIFF (32-bit float)
 #Image resolution: HIGH
 #2500 x 2308 px
@@ -104,7 +105,6 @@ st_as_text(st_geometry(bbox_polygon))
 #_______________________________________________________________________________
 
 #Now we are trying to load the images in Tiff on R
-
 setwd("C:/Users/Tommy/Documents/altavaltellian")
 
 getwd()
@@ -141,55 +141,6 @@ rasters_files <- lapply(tif_files, terra::rast)
 
 rasters_files
 
-#_______________________________________________________________________________
-
-#this cycle of commands plots even the single bands so it can be seen which are critical
-#the plots that gives a warning or an error are re-downloaded but there are images that are not being downloaded correclty for their composites
-
-for (i in seq_along(rasters_files)) {
-  cat("Plotting raster", i, "\n")
-  tryCatch({
-    plot(rasters_files[[i]], stretch = "lin")
-  }, error = function(e) {
-    cat("Xo Error in raster", i, ":", conditionMessage(e), "\n")
-  }, warning = function(w) {
-    cat(":O Warning in raster", i, ":", conditionMessage(w), "\n")
-  })
-}
-
-## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
-# Critical date ranges and required bands/composites:
-# - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
-# - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
-# Now that the rasters are mostly working,g we need to load and create the composite rasters that are not being downloaded correctly
-
-#_______________________________________________________________________________
-
-par(mfrow=c(2,4))
-plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-dev.off()
-
-
-#_______________________________________________________________________________
-
-par(mfrow=c(2,4))
-plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error
-plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
 # 3-----------------------------------------------------------------------------
 rasters_false_color[[3]]
 #source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_False_color.tiff
@@ -212,33 +163,6 @@ false_color_2289_2299 <- c(nir_2289_2299, red_2289_2299, green_2289_2299)
 
 # Plot false color maxcell=inf serve per forzare a usare tutti i pixel. 
 plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
-
-
-par(mfrow=c(2,4))
-plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
-plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-#_______________________________________________________________________________
-
-par(mfrow=c(2,4))
-plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
-plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
-plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-# working on the natural color trough the bands
-
-dev.off()
 
 # 3-----------------------------------------------------------------------------
 rasters_true_color[[3]]
@@ -264,7 +188,7 @@ true_color_2289_2299 <- c(red_2289_2299, green_2289_2299, blue_2289_2299)
 plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
 
 #maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
-plot_truecolor_3 <- plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 
 # 6-----------------------------------------------------------------------------
 rasters_true_color[[6]]
@@ -293,18 +217,6 @@ plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale=10000, stretch = "his
 plot_truecolor_6 <- plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 
 dev.off()
-
-# Final multiframe for True color
-par(mfrow=c(2,4))
-plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
 
 #_______________________________________________________________________________
 
@@ -371,7 +283,8 @@ mtext("False Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 dev.off()
 
 
-#NDVI
+#NDVI final 
+
 par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
 
 # 2022
@@ -438,42 +351,47 @@ rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 #   - NDVI may already be present in the files, but it can be recalculated if needed.
 
 # red band (B04)
-redband04_051022_060922 <- rasters_tif_B04[[1]]
-redband04_062522_072522 <- rasters_tif_B04[[2]]
-redband04_080922_090922 <- rasters_tif_B04[[3]]
-redband04_092522_102522 <- rasters_tif_B04[[4]]
+redband04_051022_060922 <- rasters_tif_B04[[1]][[1]]
+redband04_062522_072522 <- rasters_tif_B04[[2]][[1]]
+redband04_080922_090922 <- rasters_tif_B04[[3]][[1]]
+redband04_092522_102522 <- rasters_tif_B04[[4]][[1]]
 
-redband04_051023_060923 <- rasters_tif_B04[[5]]
-redband04_062523_072523 <- rasters_tif_B04[[6]]
-redband04_080923_090923 <- rasters_tif_B04[[7]]
-redband04_092523_102523 <- rasters_tif_B04[[8]]
+redband04_051023_060923 <- rasters_tif_B04[[5]][[1]]
+redband04_062523_072523 <- rasters_tif_B04[[6]][[1]]
+redband04_080923_090923 <- rasters_tif_B04[[7]][[1]]
+redband04_092523_102523 <- rasters_tif_B04[[8]][[1]]
 
 # NIR band (B08)
-nirband08_051022_060922 <- rasters_tif_B08[[1]]
-nirband08_062522_072522 <- rasters_tif_B08[[2]]
-nirband08_080922_090922 <- rasters_tif_B08[[3]]
-nirband08_092522_102522 <- rasters_tif_B08[[4]]
+nirband08_051022_060922 <- rasters_tif_B08[[1]][[1]]
+nirband08_062522_072522 <- rasters_tif_B08[[2]][[1]]
+nirband08_080922_090922 <- rasters_tif_B08[[3]][[1]]
+nirband08_092522_102522 <- rasters_tif_B08[[4]][[1]]
 
-nirband08_051023_060923 <- rasters_tif_B08[[5]]
-nirband08_062523_072523 <- rasters_tif_B08[[6]]
-nirband08_080923_090923 <- rasters_tif_B08[[7]]
-nirband08_092523_102523 <- rasters_tif_B08[[8]]
+nirband08_051023_060923 <- rasters_tif_B08[[5]][[1]]
+nirband08_062523_072523 <- rasters_tif_B08[[6]][[1]]
+nirband08_080923_090923 <- rasters_tif_B08[[7]][[1]]
+nirband08_092523_102523 <- rasters_tif_B08[[8]][[1]]
 
 # SWIR band (B11)
-swirband11_051022_060922 <- rasters_tif_B11[[1]]
-swirband11_062522_072522 <- rasters_tif_B11[[2]]
-swirband11_080922_090922 <- rasters_tif_B11[[3]]
-swirband11_092522_102522 <- rasters_tif_B11[[4]]
+swirband11_051022_060922 <- rasters_tif_B11[[1]][[1]]
+swirband11_062522_072522 <- rasters_tif_B11[[2]][[1]]
+swirband11_080922_090922 <- rasters_tif_B11[[3]][[1]]
+swirband11_092522_102522 <- rasters_tif_B11[[4]][[1]]
 
-swirband11_051023_060923 <- rasters_tif_B11[[5]]
-swirband11_062523_072523 <- rasters_tif_B11[[6]]
-swirband11_080923_090923 <- rasters_tif_B11[[7]]
-swirband11_092523_102523 <- rasters_tif_B11[[8]]
+swirband11_051023_060923 <- rasters_tif_B11[[5]][[1]]
+swirband11_062523_072523 <- rasters_tif_B11[[6]][[1]]
+swirband11_080923_090923 <- rasters_tif_B11[[7]][[1]]
+swirband11_092523_102523 <- rasters_tif_B11[[8]][[1]]
 
 #NDVI = (NIR - Red) / (NIR + Red)
+
+# Proietta il NIR (in gradi) sul sistema di coordinate del raster Red (in metri)
+nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
+NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
+
 # NDVI 2022
 NDVI_051022_060922 <- (nirband08_051022_060922 - redband04_051022_060922) / (nirband08_051022_060922 + redband04_051022_060922)
-NDVI_062522_072522 <- (nirband08_062522_072522 - redband04_062522_072522) / (nirband08_062522_072522 + redband04_062522_072522)
+NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
 NDVI_080922_090922 <- (nirband08_080922_090922 - redband04_080922_090922) / (nirband08_080922_090922 + redband04_080922_090922)
 NDVI_092522_102522 <- (nirband08_092522_102522 - redband04_092522_102522) / (nirband08_092522_102522 + redband04_092522_102522)
 
@@ -483,24 +401,64 @@ NDVI_062523_072523 <- (nirband08_062523_072523 - redband04_062523_072523) / (nir
 NDVI_080923_090923 <- (nirband08_080923_090923 - redband04_080923_090923) / (nirband08_080923_090923 + redband04_080923_090923)
 NDVI_092523_102523 <- (nirband08_092523_102523 - redband04_092523_102523) / (nirband08_092523_102523 + redband04_092523_102523)
 
-cl <- colorRampPalette(c("brown", "yellow", "green"))(100)
-plot(NDVI_051022_060922[1], col = cl, main = "NDVI 05.10–06.09 2022")
-plot(NDVI_062522_072522, col = cl, main = "NDVI 06.25–07.25 2022")
-plot(NDVI_080922_090922, col = cl, main = "NDVI 08.09–09.09 2022")
-plot(NDVI_092522_102522, col = cl, main = "NDVI 09.25–10.25 2022")
+plot(NDVI_051022_060922[[1]], col = clv, main = "NDVI 05.10–06.09 2022")
+plot(NDVI_062522_072522[[1]], col = clv, main = "NDVI 06.25–07.25 2022")
+plot(NDVI_080922_090922[[1]], col = clv, main = "NDVI 08.09–09.09 2022")
+plot(NDVI_092522_102522[[1]], col = clv, main = "NDVI 09.25–10.25 2022")
 
-plot(NDVI_051023_060923, col = cl, main = "NDVI 05.10–06.09 2023")
-plot(NDVI_062523_072523, col = cl, main = "NDVI 06.25–07.25 2023")
-plot(NDVI_080923_090923, col = cl, main = "NDVI 08.09–09.09 2023")
-plot(NDVI_092523_102523, col = cl, main = "NDVI 09.25–10.25 2023")
+plot(NDVI_051023_060923[[1]], col = clv, main = "NDVI 05.10–06.09 2023")
+plot(NDVI_062523_072523[[1]], col = clv, main = "NDVI 06.25–07.25 2023")
+plot(NDVI_080923_090923[[1]], col = clv, main = "NDVI 08.09–09.09 2023")
+plot(NDVI_092523_102523[[1]], col = clv, main = "NDVI 09.25–10.25 2023")
+
+dev.off()
 
 # - NDWI (Normalized Difference Water Index):
 #   - NIR (Band 8) and SWIR1 (Band 11)
 #   - Formula: NDWI = (NIR - SWIR1) / (NIR + SWIR1)
 #   - Used to distinguish between water bodies and stressed vegetation (e.g., drier areas).
 
+# NDWI = (NIR - SWIR1) / (NIR + SWIR1)
+# NDWI 2022
+
+NDWI_051022_060922 <- (nirband08_051022_060922 - swirband11_051022_060922) / (nirband08_051022_060922 + swirband11_051022_060922)
+NDWI_062522_072522 <- (nirband08_062522_072522 - swirband11_062522_072522) / (nirband08_062522_072522 + swirband11_062522_072522)
+NDWI_080922_090922 <- (nirband08_080922_090922 - swirband11_080922_090922) / (nirband08_080922_090922 + swirband11_080922_090922)
+NDWI_092522_102522 <- (nirband08_092522_102522 - swirband11_092522_102522) / (nirband08_092522_102522 + swirband11_092522_102522)
+
+# NDWI 2023
+NDWI_051023_060923 <- (nirband08_051023_060923 - swirband11_051023_060923) / (nirband08_051023_060923 + swirband11_051023_060923)
+NDWI_062523_072523 <- (nirband08_062523_072523 - swirband11_062523_072523) / (nirband08_062523_072523 + swirband11_062523_072523)
+NDWI_080923_090923 <- (nirband08_080923_090923 - swirband11_080923_090923) / (nirband08_080923_090923 + swirband11_080923_090923)
+NDWI_092523_102523 <- (nirband08_092523_102523 - swirband11_092523_102523) / (nirband08_092523_102523 + swirband11_092523_102523)
+
+plot(NDWI_051022_060922[[1]], col = clv, main = "NDWI 05.10–06.09 2022")
+plot(NDWI_062522_072522[[1]], col = clv, main = "NDWI 06.25–07.25 2022")
+plot(NDWI_080922_090922[[1]], col = clv, main = "NDWI 08.09–09.09 2022")
+plot(NDWI_092522_102522[[1]], col = clv, main = "NDWI 09.25–10.25 2022")
+
+plot(NDWI_051023_060923[[1]], col = clv, main = "NDWI 05.10–06.09 2023")
+plot(NDWI_062523_072523[[1]], col = clv, main = "NDWI 06.25–07.25 2023")
+plot(NDWI_080923_090923[[1]], col = clv, main = "NDWI 08.09–09.09 2023")
+plot(NDWI_092523_102523[[1]], col = clv, main = "NDWI 09.25–10.25 2023")
+
 # The results of NDVI and NDWI are used to analyze vegetation health, water stress, and drought effects.
 
+# Calcolo delle differenze NDVI tra 2023 e 2022
+difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
+difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
+difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
+difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
+
+# Visualizzazione delle mappe di differenza in griglia 2x2
+par(mfrow = c(2, 2))
+plot(difNDVI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
+plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
+plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
+plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
+
+
+dev.off()
 
 
 
@@ -532,6 +490,88 @@ plot(NDVI_092523_102523, col = cl, main = "NDVI 09.25–10.25 2023")
 
 
 
+
+#_______________________________________________________________________________
+#this cycle of commands plots even the single bands so it can be seen which are critical
+#the plots that gives a warning or an error are re-downloaded but there are images that are not being downloaded correclty for their composites
+
+#for (i in seq_along(rasters_files)) {
+#  cat("Plotting raster", i, "\n")
+#  tryCatch({
+#    plot(rasters_files[[i]], stretch = "lin")
+#  }, error = function(e) {
+#    cat("Xo Error in raster", i, ":", conditionMessage(e), "\n")
+#  }, warning = function(w) {
+#    cat(":O Warning in raster", i, ":", conditionMessage(w), "\n")
+#  })
+#}
+
+## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
+# Critical date ranges and required bands/composites:
+# - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
+# - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
+# Now that the rasters are mostly working,g we need to load and create the composite rasters that are not being downloaded correctly
+
+#_______________________________________________________________________________
+
+#par(mfrow=c(2,4))
+#plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+
+
+#_______________________________________________________________________________
+
+#par(mfrow=c(2,4))
+#plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error
+#plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+
+
+##par(mfrow=c(2,4))
+#plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
+#plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+
+#_______________________________________________________________________________
+
+#par(mfrow=c(2,4))
+#plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
+#plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
+#plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+
+# working on the natural color trough the bands
+
+# Final multiframe for True color
+#par(mfrow=c(2,4))
+#plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+#plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+#plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+#plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
 
 
 #_______________________________________________________________________________
@@ -578,79 +618,6 @@ for (file in tif_files) {
   
 #_______________________________________________________________________________
   
-
-  
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #_______________________________________________________________________________
