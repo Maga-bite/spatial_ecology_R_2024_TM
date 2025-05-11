@@ -421,6 +421,9 @@ dev.off()
 # NDWI = (NIR - SWIR1) / (NIR + SWIR1)
 # NDWI 2022
 
+nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
+
+
 NDWI_051022_060922 <- (nirband08_051022_060922 - swirband11_051022_060922) / (nirband08_051022_060922 + swirband11_051022_060922)
 NDWI_062522_072522 <- (nirband08_062522_072522 - swirband11_062522_072522) / (nirband08_062522_072522 + swirband11_062522_072522)
 NDWI_080922_090922 <- (nirband08_080922_090922 - swirband11_080922_090922) / (nirband08_080922_090922 + swirband11_080922_090922)
@@ -479,8 +482,71 @@ plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
 plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
+#_______________________________________________________________________________
+
+#now it is time to understand the different impact of the two years
+
+#B2	10 m	490 nm	Blue
+#B3	10 m	560 nm	Green
+#B4	10 m	665 nm	Red
+#B8	10 m	842 nm	Visible and Near Infrared (VNIR)
+
+tif_B02 <- tif_files[grepl("B02", tif_files)]
+tif_B03 <- tif_files[grepl("B03", tif_files)]
+
+rasters_tif_B02 <- lapply(tif_B02, terra::rast)
+rasters_tif_B03 <- lapply(tif_B03, terra::rast)
 
 
+Bands_051022_060922 <- c(rasters_tif_B04[[1]], rasters_tif_B03[[1]], rasters_tif_B02[[1]], rasters_tif_B08[[1]])
+
+#Bands_062522_072522 <- c(rasters_tif_B04[[2]], rasters_tif_B03[[2]], rasters_tif_B02[[2]], rasters_tif_B08[[2]])
+# Scegli un CRS di riferimento comune, ad esempio quello di B04
+crs_ref <- terra::crs(rasters_tif_B04[[2]])
+
+# Proietta TUTTI i raster su questo CRS
+b4_proj <- terra::project(rasters_tif_B04[[2]], crs_ref)
+b3_proj <- terra::project(rasters_tif_B03[[2]], crs_ref)
+b2_proj <- terra::project(rasters_tif_B02[[2]], crs_ref)
+b8_proj <- terra::project(rasters_tif_B08[[2]], crs_ref)
+
+# Usa B04 proiettato come riferimento per il resample
+b3_res <- terra::resample(b3_proj, b4_proj)
+b2_res <- terra::resample(b2_proj, b4_proj)
+b8_res <- terra::resample(b8_proj, b4_proj)
+
+# Ora combini tutti i raster proiettati e riallineati
+Bands_062522_072522 <- c(b4_proj, b3_res, b2_res, b8_res)
+
+Bands_080922_090922 <- c(rasters_tif_B04[[3]], rasters_tif_B03[[3]], rasters_tif_B02[[3]], rasters_tif_B08[[3]])
+Bands_092522_102522 <- c(rasters_tif_B04[[4]], rasters_tif_B03[[4]], rasters_tif_B02[[4]], rasters_tif_B08[[4]])
+
+Bands_051023_060923 <- c(rasters_tif_B04[[5]], rasters_tif_B03[[5]], rasters_tif_B02[[5]], rasters_tif_B08[[5]])
+Bands_062523_072523 <- c(rasters_tif_B04[[6]], rasters_tif_B03[[6]], rasters_tif_B02[[6]], rasters_tif_B08[[6]])
+Bands_080923_090923 <- c(rasters_tif_B04[[7]], rasters_tif_B03[[7]], rasters_tif_B02[[7]], rasters_tif_B08[[7]])
+Bands_092523_102523 <- c(rasters_tif_B04[[8]], rasters_tif_B03[[8]], rasters_tif_B02[[8]], rasters_tif_B08[[8]])
+
+library(imageRy)
+
+Bands_051022_060922_class <- im.classify(Bands_051022_060922, num_clusters = 10)
+Bands_062522_072522_class <- im.classify(Bands_062522_072522, num_clusters = 2)
+Bands_080922_090922_class <- im.classify(Bands_080922_090922, num_clusters = 2)
+Bands_092522_102522_class <- im.classify(Bands_092522_102522, num_clusters = 2)
+Bands_051023_060923_class <- im.classify(Bands_051023_060923, num_clusters = 2)
+Bands_062523_072523_class <- im.classify(Bands_062523_072523, num_clusters = 2)
+Bands_080923_090923_class <- im.classify(Bands_080923_090923, num_clusters = 2)
+Bands_092523_102523_class <- im.classify(Bands_092523_102523, num_clusters = 2)
+
+# Plot delle classificazioni
+par(mfrow)
+plot(Bands_051022_060922_class)
+plot(Bands_062522_072522_class)
+plot(Bands_080922_090922_class)
+plot(Bands_092522_102522_class)
+plot(Bands_051023_060923_class)
+plot(Bands_062523_072523_class)
+plot(Bands_080923_090923_class)
+plot(Bands_092523_102523_class)
 
 
 
