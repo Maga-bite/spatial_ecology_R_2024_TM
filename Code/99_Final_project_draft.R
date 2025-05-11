@@ -460,8 +460,15 @@ plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 dev.off()
 
 difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
-difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
+#difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
 #Errore: [-] extents do not match
+# Proietta il 2023 sul CRS del 2022
+NDWI_062523_072523_proj <- terra::project(NDWI_062523_072523, NDWI_062522_072522)
+# Ora resample per far combaciare anche risoluzione e extent
+NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_062522_072522)
+# Ora puoi calcolare la differenza
+difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
+
 difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
 difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
 
@@ -471,8 +478,6 @@ plot(difNDWI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
 plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
 plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
-
-
 
 
 
