@@ -66,17 +66,17 @@ st_as_text(st_geometry(bbox_polygon))
 
 # Plant seasonal phases:
 
-# Avoiding the dormancy period because NDVI dosen't see the photosynthetic activity since it's too low or even absent
+# Avoiding the dormancy period because NDVI don't see the photosynthetic activity since it's too low or even absent
 
 # Vegetative awakening (Spring): May 10 – June 9
-# During this phase, the first leaves start to appear, with flowering and the beginning of growth. 
-# The NDVI (Normalized Difference Vegetation Index) shows rapid growth.
+# During this phase, the first leaves appear, with flowering and the beginning of growth. 
+# The NDVI (Normalized Difference Vegetation Index) should show rapid growth.
 #
 # Maximum activity (Early Summer): June 25 – July 24
 # This is the period of maximum photosynthesis, with full leaf coverage. NDVI reaches its peak.
 #
 # Summer stress (Late Summer): August 9 – September 9
-# During this phase, plants may experience water stress. NDVI stabilizes or shows a slight decrease.
+# During this phase, plants may experience water or heat stress. NDVI stabilizes or shows a slight decrease.
 #
 # Early senescence (Pre-Autumn): September 25 – October 25
 # Leaves begin to yellow, and photosynthetic activity decreases. NDVI shows a noticeable drop.
@@ -89,11 +89,9 @@ st_as_text(st_geometry(bbox_polygon))
 
 #Image format:
 
-#In sintesi:
-#Usa i layer: True Color, NDVI, False Color (urban)
-#Scarica B03, B04, B05, B06 B08, B08A B11, B12
-#Risoluzione: 10 m dove possibile
-
+#Summary of the downloaded images:
+#layer: True Color, NDVI, False Color (urban)
+#single bands B03, B04, B05, B06 B08, B08A B11, B12
 #TIFF (32-bit float)
 #Image resolution: HIGH
 #2500 x 2308 px
@@ -117,26 +115,28 @@ tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
 library(raster)
 library(terra)
 
-# List all .tiff files in the current directory
+# List of all the files in the chosen dirrectory
 tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
 print(tif_files)
 
-# 2. Separa i file in base al nome
+# Grouping the file based on the layer that we want to analayse
 tif_true_color <- tif_files[grepl("True_color", tif_files)]
 tif_NDVI <- tif_files[grepl("NDVI", tif_files)]
 tif_false_color <- tif_files[grepl("False_color", tif_files)]
 
-# 3. Crea liste di raster
+# Creation of the raster applying terra::rast to all the files
 rasters_true_color <- lapply(tif_true_color, terra::rast)
 rasters_NDVI <- lapply(tif_NDVI, terra::rast)
 rasters_false_color <- lapply(tif_false_color, terra::rast)
 
+#example to see if the plot goes well
 rasters_true_color[[1]]
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 
 # Now a check on the state of the tiff files and the possibility to plot them
 
-#raster of all the files
+# Raster of all the files, even single bands, since some images are corrupted and couldn't be downloaded after many tries
+# This is needed for the construction of the single images
 rasters_files <- lapply(tif_files, terra::rast)
 
 rasters_files
@@ -153,16 +153,20 @@ b4_2289_2299 <- rasters_files[[26]][[1]] # red
 b3_2289_2299 <- rasters_files[[27]][[1]] # green
 b8_2289_2299 <- rasters_files[[30]][[1]] # (NIR) (8)
 
-# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+# Selecting of the first file to plot only the image and not the raster
 nir_2289_2299 <- b8_2289_2299[[1]]
 red_2289_2299 <- b4_2289_2299[[1]]
 green_2289_2299 <- b3_2289_2299[[1]]
 
-# Stack delle bande per il false color
+# Stack of the bands
 false_color_2289_2299 <- c(nir_2289_2299, red_2289_2299, green_2289_2299)
 
-# Plot false color maxcell=inf serve per forzare a usare tutti i pixel. 
+# Plot false color maxcell=inf is needed to force the use of all the pixels from the file 
 plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
+
+####
+# Gives a strange blue hue instead of the usual white
+####
 
 # 3-----------------------------------------------------------------------------
 rasters_true_color[[3]]
@@ -207,13 +211,12 @@ red_23625_23725 <- b4_23625_23725[[1]]
 green_23625_23725 <- b3_23625_23725[[1]]
 blue_23625_23725 <- b2_23625_23725[[1]]
 
-# Stack delle bande RGB
+# Stack
 true_color_23625_23725 <- c(red_23625_23725, green_23625_23725, blue_23625_23725)
 
 # Plot RGB
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
 
-#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
 plot_truecolor_6 <- plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 
 dev.off()
@@ -314,8 +317,6 @@ mtext("NDVI RGB Composite", outer = TRUE, side = 3, line = 1, cex = 1.2)
 
 dev.off()
 
-#we made it and 
-
 #_______________________________________________________________________________
 
 
@@ -338,17 +339,17 @@ rasters_tif_B04 <- lapply(tif_B04, terra::rast)
 rasters_tif_B08 <- lapply(tif_B08, terra::rast)
 rasters_tif_B11 <- lapply(tif_B11, terra::rast)
 
-#05102*_06092* → dal 10 maggio al 9 giugno
-#06252*_07252* → dal 25 giugno al 25 luglio
-#08092*_09092* → dal 9 agosto al 9 settembre
-#09252*_10252* → dal 25 settembre al 25 ottobre
+#05102*_06092* → from may 10th to ju e 9th
+#06252*_07252* → from 255h of june to 25th of july
+#08092*_09092* → from 9th of august to the 9th of september
+#09252*_10252* → from the 25th of September to the 25th of October
 
 # Required bands for analysis:
-# - NDVI (Normalized Difference Vegetation Index):
+#   - NDVI (Normalized Difference Vegetation Index):
 #   - Red (Band 4) and NIR (Band 8)
 #   - Formula: NDVI = (NIR - Red) / (NIR + Red)
 #   - Used to assess vegetation health.
-#   - NDVI may already be present in the files, but it can be recalculated if needed.
+#   - NDVI already be present in the files, but it can be recalculated if needed.
 
 # red band (B04)
 redband04_051022_060922 <- rasters_tif_B04[[1]][[1]]
@@ -385,7 +386,8 @@ swirband11_092523_102523 <- rasters_tif_B11[[8]][[1]]
 
 #NDVI = (NIR - Red) / (NIR + Red)
 
-# Proietta il NIR (in gradi) sul sistema di coordinate del raster Red (in metri)
+# From previous errors, some files needed to be reprojected on the CRS
+# Mainly the NIR in degrees reprogected on the RED band in meters
 nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
 NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
 
@@ -421,8 +423,8 @@ dev.off()
 # NDWI = (NIR - SWIR1) / (NIR + SWIR1)
 # NDWI 2022
 
+# From previous errors, some files needed to be reprojected on the CRS
 nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
-
 
 NDWI_051022_060922 <- (nirband08_051022_060922 - swirband11_051022_060922) / (nirband08_051022_060922 + swirband11_051022_060922)
 NDWI_062522_072522 <- (nirband08_062522_072522 - swirband11_062522_072522) / (nirband08_062522_072522 + swirband11_062522_072522)
@@ -462,16 +464,19 @@ plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
 dev.off()
 
+
+
+
 difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
+#----------------------------------------------------
 #difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
 #Errore: [-] extents do not match
-# Proietta il 2023 sul CRS del 2022
+# Projection of the roietta il 2023 sul CRS del 2022
 NDWI_062523_072523_proj <- terra::project(NDWI_062523_072523, NDWI_062522_072522)
 # Ora resample per far combaciare anche risoluzione e extent
 NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_062522_072522)
-# Ora puoi calcolare la differenza
+#----------------------------------------------------
 difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
-
 difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
 difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
 
@@ -484,13 +489,14 @@ plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
 #_______________________________________________________________________________
 
-#now it is time to understand the different impact of the two years
+# Now it is time to understand the different impact of the two years
 
 #B2	10 m	490 nm	Blue
 #B3	10 m	560 nm	Green
 #B4	10 m	665 nm	Red
 #B8	10 m	842 nm	Visible and Near Infrared (VNIR)
 
+# Rastering the remaining band needed for the analysis
 tif_B02 <- tif_files[grepl("B02", tif_files)]
 tif_B03 <- tif_files[grepl("B03", tif_files)]
 
@@ -501,6 +507,7 @@ rasters_tif_B03 <- lapply(tif_B03, terra::rast)
 Bands_051022_060922 <- c(rasters_tif_B04[[1]], rasters_tif_B03[[1]], rasters_tif_B02[[1]], rasters_tif_B08[[1]])
 
 #Bands_062522_072522 <- c(rasters_tif_B04[[2]], rasters_tif_B03[[2]], rasters_tif_B02[[2]], rasters_tif_B08[[2]])
+
 # Scegli un CRS di riferimento comune, ad esempio quello di B04
 crs_ref <- terra::crs(rasters_tif_B04[[2]])
 
@@ -547,6 +554,31 @@ plot(Bands_051023_060923_class)
 plot(Bands_062523_072523_class)
 plot(Bands_080923_090923_class)
 plot(Bands_092523_102523_class)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
