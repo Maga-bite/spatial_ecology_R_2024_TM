@@ -461,11 +461,7 @@ plot(difNDVI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
 plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
 plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
-
 dev.off()
-
-
-
 
 difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
 #----------------------------------------------------
@@ -535,14 +531,14 @@ Bands_092523_102523 <- c(rasters_tif_B04[[8]], rasters_tif_B03[[8]], rasters_tif
 
 library(imageRy)
 
-Bands_051022_060922_class <- im.classify(Bands_051022_060922, num_clusters = 10)
-Bands_062522_072522_class <- im.classify(Bands_062522_072522, num_clusters = 2)
-Bands_080922_090922_class <- im.classify(Bands_080922_090922, num_clusters = 2)
-Bands_092522_102522_class <- im.classify(Bands_092522_102522, num_clusters = 2)
-Bands_051023_060923_class <- im.classify(Bands_051023_060923, num_clusters = 2)
-Bands_062523_072523_class <- im.classify(Bands_062523_072523, num_clusters = 2)
-Bands_080923_090923_class <- im.classify(Bands_080923_090923, num_clusters = 2)
-Bands_092523_102523_class <- im.classify(Bands_092523_102523, num_clusters = 2)
+Bands_051022_060922_class <- im.classify(Bands_051022_060922, num_clusters = 5)
+Bands_062522_072522_class <- im.classify(Bands_062522_072522, num_clusters = 5)
+Bands_080922_090922_class <- im.classify(Bands_080922_090922, num_clusters = 5)
+Bands_092522_102522_class <- im.classify(Bands_092522_102522, num_clusters = 5)
+Bands_051023_060923_class <- im.classify(Bands_051023_060923, num_clusters = 5)
+Bands_062523_072523_class <- im.classify(Bands_062523_072523, num_clusters = 5)
+Bands_080923_090923_class <- im.classify(Bands_080923_090923, num_clusters = 5)
+Bands_092523_102523_class <- im.classify(Bands_092523_102523, num_clusters = 5)
 
 # Plot delle classificazioni
 par(mfrow)
@@ -593,11 +589,7 @@ plot(Bands_092523_102523_class)
 
 
 
-
-
-
-
-
+#DA QUI SONO COSE TENTATE E WORK IN PROGRESS CHE NON SERVON
 
 
 
