@@ -449,13 +449,12 @@ plot(NDWI_092523_102523[[1]], col = clv, main = "NDWI 09.25–10.25 2023")
 
 # The results of NDVI and NDWI are used to analyze vegetation health, water stress, and drought effects.
 
-# Calcolo delle differenze NDVI tra 2023 e 2022
+#NDVI
 difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
 difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
 difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
 difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
 
-# Visualizzazione delle mappe di differenza in griglia 2x2
 par(mfrow = c(2, 2))
 plot(difNDVI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
 plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
@@ -463,20 +462,20 @@ plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 dev.off()
 
+#NDWI
 difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
 #----------------------------------------------------
 #difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
 #Errore: [-] extents do not match
-# Projection of the roietta il 2023 sul CRS del 2022
+# Projection 2023 on CRS from 2022
 NDWI_062523_072523_proj <- terra::project(NDWI_062523_072523, NDWI_062522_072522)
-# Ora resample per far combaciare anche risoluzione e extent
+# Ora resamplefor the extent and resolution match
 NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_062522_072522)
 #----------------------------------------------------
 difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
 difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
 difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
 
-# Visualizzazione delle mappe di differenza in griglia 2x2
 par(mfrow = c(2, 2))
 plot(difNDWI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
 plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
@@ -484,6 +483,124 @@ plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
 #_______________________________________________________________________________
+
+# Now it is time to understand the different impact of the two years
+# We want to see the differences in the photosynthetic activity
+#so it is needed,d the classification of the NDVI between years
+
+#-------------------------------------------------------------------------------
+
+#problem with the classification
+library(imageRy)
+
+Bands_NDVI_051022_060922_class <- im.classify(NDVI_051022_060922, num_clusters = 2)
+Bands_NDVI_062522_072522_class <- im.classify(NDVI_062522_072522, num_clusters = 2)
+Bands_NDVI_080922_090922_class <- im.classify(NDVI_080922_090922, num_clusters = 2)
+Bands_NDVI_092522_102522_class <- im.classify(NDVI_092522_102522, num_clusters = 2)
+
+Bands_NDVI_051023_060923_class <- im.classify(NDVI_051023_060923, num_clusters = 2)
+Bands_NDVI_062523_072523_class <- im.classify(NDVI_062523_072523, num_clusters = 2)
+Bands_NDVI_080923_090923_class <- im.classify(NDVI_080923_090923, num_clusters = 2)
+Bands_NDVI_092523_102523_class <- im.classify(NDVI_092523_102523, num_clusters = 2)
+
+#-------------------------------------------------------------------------------
+
+freq_NDVI_051022_060922 <- freq(Bands_NDVI_051022_060922_class)
+freq_NDVI_062522_072522 <- freq(Bands_NDVI_062522_072522_class)
+freq_NDVI_080922_090922 <- freq(Bands_NDVI_080922_090922_class)
+freq_NDVI_092522_102522 <- freq(Bands_NDVI_092522_102522_class)
+
+freq_NDVI_051023_060923 <- freq(Bands_NDVI_051023_060923_class)
+freq_NDVI_062523_072523 <- freq(Bands_NDVI_062523_072523_class)
+freq_NDVI_080923_090923 <- freq(Bands_NDVI_080923_090923_class)
+freq_NDVI_092523_102523 <- freq(Bands_NDVI_092523_102523_class)
+
+
+tot_NDVI_051022_060922 <- ncell(Bands_NDVI_051022_060922_class)
+tot_NDVI_062522_072522 <- ncell(Bands_NDVI_062522_072522_class)
+tot_NDVI_080922_090922 <- ncell(Bands_NDVI_080922_090922_class)
+tot_NDVI_092522_102522 <- ncell(Bands_NDVI_092522_102522_class)
+
+tot_NDVI_051023_060923 <- ncell(Bands_NDVI_051023_060923_class)
+tot_NDVI_062523_072523 <- ncell(Bands_NDVI_062523_072523_class)
+tot_NDVI_080923_090923 <- ncell(Bands_NDVI_080923_090923_class)
+tot_NDVI_092523_102523 <- ncell(Bands_NDVI_092523_102523_class)
+
+
+
+perc_NDVI_051022_060922 <- freq_NDVI_051022_060922$count * 100 / tot_NDVI_051022_060922
+perc_NDVI_062522_072522 <- freq_NDVI_062522_072522$count * 100 / tot_NDVI_062522_072522
+perc_NDVI_080922_090922 <- freq_NDVI_080922_090922$count * 100 / tot_NDVI_080922_090922
+perc_NDVI_092522_102522 <- freq_NDVI_092522_102522$count * 100 / tot_NDVI_092522_102522
+
+perc_NDVI_051023_060923 <- freq_NDVI_051023_060923$count * 100 / tot_NDVI_051023_060923
+perc_NDVI_062523_072523 <- freq_NDVI_062523_072523$count * 100 / tot_NDVI_062523_072523
+perc_NDVI_080923_090923 <- freq_NDVI_080923_090923$count * 100 / tot_NDVI_080923_090923
+perc_NDVI_092523_102523 <- freq_NDVI_092523_102523$count * 100 / tot_NDVI_092523_102523
+
+
+#should continue like this like in the lessons
+
+class <- c("Forest","Human")
+y1992 <- c(83, 17)
+#this was the percebtage of 1992 let's do 2006
+y2006 <- c(45,55)
+
+#let'sclamp togheter the collumn
+tabout<-data.frame(class, y1992, y2006)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###################################################################################################DA QUI SONO COSE TENTATE E WORK IN PROGRESS CHE NON SERVONO
+
+
+
+
 
 # Now it is time to understand the different impact of the two years
 
@@ -550,48 +667,6 @@ plot(Bands_051023_060923_class)
 plot(Bands_062523_072523_class)
 plot(Bands_080923_090923_class)
 plot(Bands_092523_102523_class)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#DA QUI SONO COSE TENTATE E WORK IN PROGRESS CHE NON SERVON
-
-
 
 
 
