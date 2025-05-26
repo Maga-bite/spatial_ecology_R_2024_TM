@@ -552,7 +552,12 @@ tabout<-data.frame(class, y1992, y2006)
 
 
 
+summary(values(difNDWI_09))
 
+valori <- values(difNDWI_09) |>
+  na.omit()
+|>  |> |> |> 
+summary(valori)
 
 
 
