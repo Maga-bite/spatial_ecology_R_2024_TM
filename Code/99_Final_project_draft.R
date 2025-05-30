@@ -482,8 +482,8 @@ plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
 plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
 plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
-#_______________________________________________________________________________
 
+#_______________________________________________________________________________
 
 # Now it is time to understand the different impact of the two years
 # We want to see the differences in the photosynthetic activity
@@ -497,6 +497,8 @@ plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 #(approximately 0.2 to 0.5). High NDVI values (approximately 0.6 to 0.9) 
 #correspond to dense vegetation such as that found in temperate and tropical 
 #forests or crops at their peak growth stage. 
+
+library(imageRy)
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -612,6 +614,65 @@ P_TC_092523_102523_class
 #1 31.53042 denser vegetation
 #2 20.30043 glacier and rocks
 #3 48.16915 stone and dry pastures
+
+#--------------------------------------------------------------------------------
+
+class <- c("Dense vegetation","Baren terrain")
+
+# Percentuali di vegetazione densa per ogni periodo
+dens_veg <- c(  28.56901,
+                41.14040, 
+                36.77702,
+                38.59825,
+                24.19485,
+                50.42995,
+                30.79466,
+                31.53042)
+
+barren_terrain <- 100 - dens_veg
+
+# Etichette dei periodi
+periods <- c( "051022–060922",
+              "062522–072522",
+              "080922–090922",
+              "092522–102522",
+              "051023–060923",
+              "062523–072523",
+              "080923–090923",
+              "092523–102523")
+
+
+# Crea data.frame
+df2 <- data.frame(class,
+                 `051023–060923` = c(barren_terrain[5], dens_veg[5]),
+                 `062523–072523` = c(barren_terrain[6], dens_veg[6]),
+                 `080923–090923` = c(barren_terrain[7], dens_veg[7]),
+                 `092523–102523` = c(barren_terrain[8], dens_veg[8]))
+
+df1 <- data.frame(class,
+                  `051022–060922` = c(barren_terrain[1], dens_veg[1]),
+                  `062522–072522` = c(barren_terrain[2], dens_veg[2]),
+                  `080922–090922` = c(barren_terrain[3], dens_veg[3]),
+                  `092522–102522` = c(barren_terrain[4], dens_veg[4]))
+
+library(ggplot2) # For creating graphs
+
+# Plot the bar graphs showing forest classification for 2017 and 2023 using Viridis color palette
+g1 <- ggplot(df1, aes(x=class, y=percentage, fill=class)) + geom_bar(stat="identity") + scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + labs(title = "Forest Classification in 2017", y = "Percentage", x = "Classes")
+g1
+
+g2 <- ggplot(data, aes(x=classes, y=year_2023, fill=classes)) + geom_bar(stat="identity") +  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + labs(title = "Forest Classification in 2023", y = "Percentage", x = "Classes")
+# aes() -> to define the aethetics of the plot
+# x=classes -> for the x-axis will to display the classes ("Cleared" and "Original")
+# y=year_2017 -> for the y-axis to represent the values from the relative year column in the dataset
+# fill=classes -> so the bars will be filled with colors based on the classes variable
+# geom_bar(stat="identity") -> geom_bar() is used to create a bar graph and stat=identity specifies the data are used just us they are
+# scale_fill_viridis_d(option = "D") -> scale_fill_viridis_d() applies Viridis palette when your variable is discrete (i.e., categorical data), option ="D" is the default color palette
+# ylim(c(0, 100)) -> sets the limits for the y axis
+# labs() -> to customize the labels of the plot
+
+g1 + g2
+
 
 
 
