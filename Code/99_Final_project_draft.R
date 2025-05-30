@@ -498,17 +498,6 @@ plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 #correspond to dense vegetation such as that found in temperate and tropical 
 #forests or crops at their peak growth stage. 
 
-library(imageRy)
-
-vals <- na.omit(rasters_false_color[[1]])
-summary(vals)
-Bands_false_051022_060922_class <- im.classify(rasters_true_color[[1]], num_clusters = 3)
-plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-
-
-Bands_try <- im.classify(true_color_2289_2299, num_clusters = 3)
-
-#analisi preventiva dello stato della vegetazione
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 Bands_TC_051022_060922_class <- im.classify(rasters_true_color[[1]], num_clusters = 3)
@@ -537,17 +526,19 @@ P_TC_062522_072522_class
 
 
 par(mfrow = c(1,2))
-plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, stretch = "lin")
-Bands_TC_080922_090922_class <- im.classify(true_color_2289_2299, num_clusters = 3)
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+Bands_TC_080922_090922_class <- im.classify(true_color_2289_2299, num_clusters = 5)
 
 Freq_TC_080922_090922_class <- freq(Bands_TC_080922_090922_class)
 Freq_TC_080922_090922_class
 Tot_TC_080922_090922_class <- ncell(Bands_TC_080922_090922_class)
 P_TC_080922_090922_class <- Freq_TC_080922_090922_class[3] * 100 / Tot_TC_080922_090922_class
 P_TC_080922_090922_class
-#1 59.569740 denser vegetation and a bit of pastures
-#2  2.525043 stone
-#3 37.905217 mountain and high altitude pastures
+#1 36.7770191 denser vegetation
+#2  4.6405546 cloud coverage on the mountain top
+#3  0.3673657 dunno
+#4 23.1041075 stone and villages
+#5 35.1109532 montain top
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -564,7 +555,7 @@ P_TC_092522_102522_class
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-Bands_TC_051023_060923_class <- im.classify(rasters_true_color[[5]], num_clusters = 3)
+Bands_TC_051023_060923_class <- im.classify(rasters_true_color[[5]], num_clusters = 5)
 
 Freq_TC_051023_060923_class <- freq(Bands_TC_051023_060923_class)
 Freq_TC_051023_060923_class
@@ -574,6 +565,12 @@ P_TC_051023_060923_class
 #1 24.51617 denser vegetation
 #2 51.28898 cloud coverage on the mountains and mountains
 #3 24.19485 villages and pastures
+
+#1  4.911768 it's the outer most margin and it has to be counted as vegetation
+#2 14.960087 border of the forest and stone
+#3 19.869116 denser vegetation
+#4 43.439324 cloud coverage and mountain top
+#5 16.819705 less denser vegetation
 
 par(mfrow = c(1,2))
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
