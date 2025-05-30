@@ -484,9 +484,230 @@ plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
 
 #_______________________________________________________________________________
 
+
 # Now it is time to understand the different impact of the two years
 # We want to see the differences in the photosynthetic activity
-#so it is needed,d the classification of the NDVI between years
+# So it is needed, the classification of the true color map in a way that let us 
+# have a preliminary search on the condition of the forests.
+# Later we are going to analyse the values of the NDVI.
+
+#NDVI values range from +1.0 to -1.0. Areas of barren rock, sand, or snow usually
+#show very low NDVI values (for example, 0.1 or less). Sparse vegetation such as 
+#shrubs and grasslands or senescing crops may result in moderate NDVI values 
+#(approximately 0.2 to 0.5). High NDVI values (approximately 0.6 to 0.9) 
+#correspond to dense vegetation such as that found in temperate and tropical 
+#forests or crops at their peak growth stage. 
+
+library(imageRy)
+
+vals <- na.omit(rasters_false_color[[1]])
+summary(vals)
+Bands_false_051022_060922_class <- im.classify(rasters_true_color[[1]], num_clusters = 3)
+plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+
+
+Bands_try <- im.classify(true_color_2289_2299, num_clusters = 3)
+
+#analisi preventiva dello stato della vegetazione
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_051022_060922_class <- im.classify(rasters_true_color[[1]], num_clusters = 3)
+
+Freq_TC_051022_060922_class <- freq(Bands_TC_051022_060922_class)
+Freq_TC_051022_060922_class
+Tot_TC_051022_060922_class <- ncell(Bands_TC_051022_060922_class)
+P_TC_051022_060922_class = Freq_TC_051022_060922_class[3]*100/Tot_TC_051022_060922_class #the third column is the count for each pixel
+P_TC_051022_060922_class
+#1 41.68983 these are mountains' peak
+#2 28.56901 these are denser forests
+#3 29.74116 these are high altitude pastures and villages that still have a percentage of cement
+
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_062522_072522_class <- im.classify(rasters_true_color[[2]], num_clusters = 3)
+
+Freq_TC_062522_072522_class <- freq(Bands_TC_062522_072522_class)
+Freq_TC_062522_072522_class
+Tot_TC_062522_072522_class <- ncell(Bands_TC_062522_072522_class)
+P_TC_062522_072522_class <- Freq_TC_062522_072522_class[3] * 100 / Tot_TC_062522_072522_class
+P_TC_062522_072522_class
+#1 24.29951 a bit of cloud coverage and stone
+#2 41.14040 denser forests
+#3 34.56009 mountain peaks
+
+
+par(mfrow = c(1,2))
+plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_080922_090922_class <- im.classify(true_color_2289_2299, num_clusters = 3)
+
+Freq_TC_080922_090922_class <- freq(Bands_TC_080922_090922_class)
+Freq_TC_080922_090922_class
+Tot_TC_080922_090922_class <- ncell(Bands_TC_080922_090922_class)
+P_TC_080922_090922_class <- Freq_TC_080922_090922_class[3] * 100 / Tot_TC_080922_090922_class
+P_TC_080922_090922_class
+#1 59.569740 denser vegetation and a bit of pastures
+#2  2.525043 stone
+#3 37.905217 mountain and high altitude pastures
+
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_092522_102522_class <- im.classify(rasters_true_color[[4]], num_clusters = 3)
+
+Freq_TC_092522_102522_class <- freq(Bands_TC_092522_102522_class)
+Freq_TC_092522_102522_class
+Tot_TC_092522_102522_class <- ncell(Bands_TC_092522_102522_class)
+P_TC_092522_102522_class <- Freq_TC_092522_102522_class[3] * 100 / Tot_TC_092522_102522_class
+P_TC_092522_102522_class
+#1 22.27191 high altitude snow
+#2 38.59825 denser forests
+#3 39.12984 stone and a bit of high altitude pastures
+
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_051023_060923_class <- im.classify(rasters_true_color[[5]], num_clusters = 3)
+
+Freq_TC_051023_060923_class <- freq(Bands_TC_051023_060923_class)
+Freq_TC_051023_060923_class
+Tot_TC_051023_060923_class <- ncell(Bands_TC_051023_060923_class)
+P_TC_051023_060923_class <- Freq_TC_051023_060923_class[3] * 100 / Tot_TC_051023_060923_class
+P_TC_051023_060923_class
+#1 24.51617 denser vegetation
+#2 51.28898 cloud coverage on the mountains and mountains
+#3 24.19485 villages and pastures
+
+par(mfrow = c(1,2))
+plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
+Bands_TC_062523_072523_class <- im.classify(true_color_23625_23725, num_clusters = 5)
+
+Freq_TC_062523_072523_class <- freq(Bands_TC_062523_072523_class)
+Freq_TC_062523_072523_class
+Tot_TC_062523_072523_class <- ncell(Bands_TC_062523_072523_class)
+P_TC_062523_072523_class <- Freq_TC_062523_072523_class[3] * 100 / Tot_TC_062523_072523_class
+P_TC_062523_072523_class
+#1 34.067210 villages and stone
+#2  3.285251 bit of cloud coverage
+#3 50.429948 denser vegetation
+#4  9.132322 mountain top and glacier
+#5  3.085269 mountain top and glacier
+
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_080923_090923_class <- im.classify(rasters_true_color[[7]], num_clusters = 3)
+
+Freq_TC_080923_090923_class <- freq(Bands_TC_080923_090923_class)
+Freq_TC_080923_090923_class
+Tot_TC_080923_090923_class <- ncell(Bands_TC_080923_090923_class)
+P_TC_080923_090923_class <- Freq_TC_080923_090923_class[3] * 100 / Tot_TC_080923_090923_class
+P_TC_080923_090923_class
+#1 30.79466 denser vegetation
+#2 40.64298 mountain tops and villages
+#3 28.56236 glaciers and a bit more cloud coverage
+
+par(mfrow = c(1,2))
+plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
+Bands_TC_092523_102523_class <- im.classify(rasters_true_color[[8]], num_clusters = 3)
+
+Freq_TC_092523_102523_class <- freq(Bands_TC_092523_102523_class)
+Freq_TC_092523_102523_class
+Tot_TC_092523_102523_class <- ncell(Bands_TC_092523_102523_class)
+P_TC_092523_102523_class <- Freq_TC_092523_102523_class[3] * 100 / Tot_TC_092523_102523_class
+P_TC_092523_102523_class
+#1 31.53042 denser vegetation
+#2 20.30043 glacier and rocks
+#3 48.16915 stone and dry pastures
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #-------------------------------------------------------------------------------
 
