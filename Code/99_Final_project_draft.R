@@ -643,35 +643,53 @@ periods <- c( "051022–060922",
 
 
 # Crea data.frame
-df2 <- data.frame(class,
-                 `051023–060923` = c(barren_terrain[5], dens_veg[5]),
-                 `062523–072523` = c(barren_terrain[6], dens_veg[6]),
-                 `080923–090923` = c(barren_terrain[7], dens_veg[7]),
-                 `092523–102523` = c(barren_terrain[8], dens_veg[8]))
+df23 <- data.frame(class,
+                  "10.05-09.06" = c(barren_terrain[5], dens_veg[5]),
+                  "26.06-25.07" = c(barren_terrain[6], dens_veg[6]),
+                  "09.08-09.09" = c(barren_terrain[7], dens_veg[7]),
+                  "25.09-25.10" = c(barren_terrain[8], dens_veg[8]))
 
-df1 <- data.frame(class,
-                  `051022–060922` = c(barren_terrain[1], dens_veg[1]),
-                  `062522–072522` = c(barren_terrain[2], dens_veg[2]),
-                  `080922–090922` = c(barren_terrain[3], dens_veg[3]),
-                  `092522–102522` = c(barren_terrain[4], dens_veg[4]))
+df22 <- data.frame(class,
+                  "10.05-09.06" = c(barren_terrain[1], dens_veg[1]),
+                  "26.06-25.07" = c(barren_terrain[2], dens_veg[2]),
+                  "09.08-09.09" = c(barren_terrain[3], dens_veg[3]),
+                  "25.09-25.10" = c(barren_terrain[4], dens_veg[4]))
+
+install.packages("tidyr")
+library(tidyr)
+
+df_long22 <- pivot_longer(df1,
+                        cols = -class,
+                        names_to = "periods",
+                        values_to = "percentage")
+
+df_long23 <- pivot_longer(df2,
+                         cols = -class,
+                         names_to = "periods",
+                         values_to = "percentage")
 
 library(ggplot2) # For creating graphs
 
-# Plot the bar graphs showing forest classification for 2017 and 2023 using Viridis color palette
-g1 <- ggplot(df1, aes(x=class, y=percentage, fill=class)) + geom_bar(stat="identity") + scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + labs(title = "Forest Classification in 2017", y = "Percentage", x = "Classes")
+
+library(ggplot2)
+
+g1 <- ggplot(df_long22, aes(x = periods, y = percentage, fill = class)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) +
+  labs(title = "Vegetation classification 2022", x = "Periods", y = "Percentage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 2), plot.title = element_text(hjust = 0.5))
+
+g2 <- ggplot(df_long23, aes(x = periods, y = percentage, fill = class)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + 
+  labs(title = "Vegetation classification 2023", x = "Periods", y = "Percentage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5))
+
+
 g1
-
-g2 <- ggplot(data, aes(x=classes, y=year_2023, fill=classes)) + geom_bar(stat="identity") +  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + labs(title = "Forest Classification in 2023", y = "Percentage", x = "Classes")
-# aes() -> to define the aethetics of the plot
-# x=classes -> for the x-axis will to display the classes ("Cleared" and "Original")
-# y=year_2017 -> for the y-axis to represent the values from the relative year column in the dataset
-# fill=classes -> so the bars will be filled with colors based on the classes variable
-# geom_bar(stat="identity") -> geom_bar() is used to create a bar graph and stat=identity specifies the data are used just us they are
-# scale_fill_viridis_d(option = "D") -> scale_fill_viridis_d() applies Viridis palette when your variable is discrete (i.e., categorical data), option ="D" is the default color palette
-# ylim(c(0, 100)) -> sets the limits for the y axis
-# labs() -> to customize the labels of the plot
-
-g1 + g2
+g2
 
 
 
