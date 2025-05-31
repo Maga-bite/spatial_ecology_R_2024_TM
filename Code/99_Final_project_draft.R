@@ -632,66 +632,74 @@ dens_veg <- c(  28.56901,
 barren_terrain <- 100 - dens_veg
 
 # Etichette dei periodi
-periods <- c( "051022–060922",
-              "062522–072522",
-              "080922–090922",
-              "092522–102522",
-              "051023–060923",
-              "062523–072523",
-              "080923–090923",
-              "092523–102523")
+periods <- c("Vegetative awakening",
+             "Maximum activity",
+             "Summer stress",
+             "Early senescence")
 
 
 # Crea data.frame
 df23 <- data.frame(class,
-                  "10.05-09.06" = c(barren_terrain[5], dens_veg[5]),
-                  "26.06-25.07" = c(barren_terrain[6], dens_veg[6]),
-                  "09.08-09.09" = c(barren_terrain[7], dens_veg[7]),
-                  "25.09-25.10" = c(barren_terrain[8], dens_veg[8]))
+                   "Vegetative awakening" = c(dens_veg[5], barren_terrain[5]),
+                   "Maximum activity" = c(dens_veg[6], barren_terrain[6]),
+                   "Summer stress" = c(dens_veg[7], barren_terrain[7]),
+                   "Early senescence" = c(dens_veg[8], barren_terrain[8]))
 
 df22 <- data.frame(class,
-                  "10.05-09.06" = c(barren_terrain[1], dens_veg[1]),
-                  "26.06-25.07" = c(barren_terrain[2], dens_veg[2]),
-                  "09.08-09.09" = c(barren_terrain[3], dens_veg[3]),
-                  "25.09-25.10" = c(barren_terrain[4], dens_veg[4]))
+                   "Vegetative awakening" = c(dens_veg[1], barren_terrain[1]),
+                   "Maximum activity" = c(dens_veg[2], barren_terrain[2]),
+                   "Summer stress" = c(dens_veg[3], barren_terrain[3]),
+                   "Early senescence" = c(dens_veg[4], barren_terrain[4]))
 
 install.packages("tidyr")
 library(tidyr)
 
-df_long22 <- pivot_longer(df1,
+df_long22 <- pivot_longer(df22,
                         cols = -class,
                         names_to = "periods",
                         values_to = "percentage")
 
-df_long23 <- pivot_longer(df2,
+
+
+df_long23 <- pivot_longer(df23,
                          cols = -class,
                          names_to = "periods",
                          values_to = "percentage")
 
 library(ggplot2) # For creating graphs
 
-
-library(ggplot2)
-
 g1 <- ggplot(df_long22, aes(x = periods, y = percentage, fill = class)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) +
+  scale_fill_viridis_d(option = "D") +
+  scale_x_discrete(limits = c("Vegetative.awakening",
+                              "Maximum.activity",
+                              "Summer.stress",
+                              "Early.senescence")) + ylim(c(0, 100)) +
   labs(title = "Vegetation classification 2022", x = "Periods", y = "Percentage") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 90, hjust = 2), plot.title = element_text(hjust = 0.5))
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7),
+    plot.title = element_text(hjust = 0.5))
+g1
 
 g2 <- ggplot(df_long23, aes(x = periods, y = percentage, fill = class)) +
   geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_viridis_d(option = "D") + ylim(c(0, 100)) + 
+  scale_fill_viridis_d(option = "D") +
+  scale_x_discrete(limits = c("Vegetative.awakening",
+                              "Maximum.activity",
+                              "Summer.stress",
+                              "Early.senescence")) + ylim(c(0, 100)) +
   labs(title = "Vegetation classification 2023", x = "Periods", y = "Percentage") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5))
-
-
-g1
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7),
+        plot.title = element_text(hjust = 0.5))
 g2
 
+install.packages("patchwork")
+library("patchwork")
 
+g1 + g2
+
+#_______________________________________________________________________________
 
 
 
