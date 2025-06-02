@@ -655,16 +655,16 @@ install.packages("tidyr")
 library(tidyr)
 
 df_long22 <- pivot_longer(df22,
-                        cols = -class,
-                        names_to = "periods",
-                        values_to = "percentage")
+                          cols = -class,
+                          names_to = "periods",
+                          values_to = "percentage")
 
 
 
 df_long23 <- pivot_longer(df23,
-                         cols = -class,
-                         names_to = "periods",
-                         values_to = "percentage")
+                          cols = -class,
+                          names_to = "periods",
+                          values_to = "percentage")
 
 library(ggplot2) # For creating graphs
 
@@ -678,7 +678,7 @@ g1 <- ggplot(df_long22, aes(x = periods, y = percentage, fill = class)) +
   labs(title = "Vegetation classification 2022", x = "Periods", y = "Percentage") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7),
-    plot.title = element_text(hjust = 0.5))
+        plot.title = element_text(hjust = 0.5))
 g1
 
 g2 <- ggplot(df_long23, aes(x = periods, y = percentage, fill = class)) +
@@ -701,9 +701,131 @@ g1 + g2
 
 #_______________________________________________________________________________
 
-#data from https://app.climateengine.org/climateEngine
+# Calculation of NDVI difference (ΔNDVI) between periods 
+# to quantify changes in vegetation activity or health over time,
+# comparing similar phenological periods across 2 different years.
+
+# Interpretation of ΔNDVI values:
+#   ≈ 0   --> Vegetation remains stable
+#   < 0   --> Decrease in vegetation activity (possible stress or degradation)
+#   > 0   --> Increase in vegetation activity (growth, recovery)
+#   Values near -1 or -2 indicate drastic decline (e.g., total vegetation loss)
+#   Values near +1 or +2 indicate strong increase (e.g., new growth or recovery)
+
+difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
+difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
+difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
+difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
+
+val_difNDVI_05 <- values(difNDVI_05) |> 
+  na.omit()
+
+val_difNDVI_06 <- values(difNDVI_06) |> 
+  na.omit()
+
+val_difNDVI_08 <- values(difNDVI_08) |> 
+  na.omit()
+
+val_difNDVI_09 <- values(difNDVI_09) |> 
+  na.omit()
+
+summary(val_difNDVI_05)
+summary(val_difNDVI_06)
+summary(val_difNDVI_08)
+summary(val_difNDVI_09)
+
+# function to categorize the NDVI differences based on the limits
+
+categorize_ndvi_diff <- function(x) {
+  cut(x, breaks = seq(-2, 2, length.out = 6), right = TRUE)
+}
+
+dh1 <- categorize_ndvi_diff(val_difNDVI_05)
+dh2 <- categorize_ndvi_diff(val_difNDVI_06)
+dh3 <- categorize_ndvi_diff(val_difNDVI_08)
+dh4 <- categorize_ndvi_diff(val_difNDVI_09)
+
+# Costruisci il dataframe finale
+df_dh1 <- as.data.frame(table(dh1))
+colnames(df_dh1) <- c("NDVI_Interval", "Count")
+
+# Ordina per intervallo
+df_dh1$NDVI_Interval <- factor(df_dh1$NDVI_Interval,
+                               levels = levels(dh1),
+                               ordered = TRUE)
+
+# Costruisci il dataframe finale
+df_dh2 <- as.data.frame(table(dh2))
+colnames(df_dh2) <- c("NDVI_Interval", "Count")
+
+# Ordina per intervallo
+df_dh2$NDVI_Interval <- factor(df_dh2$NDVI_Interval,
+                               levels = levels(dh2),
+                               ordered = TRUE)
+
+# Costruisci il dataframe finale
+df_dh3 <- as.data.frame(table(dh3))
+colnames(df_dh3) <- c("NDVI_Interval", "Count")
+
+# Ordina per intervallo
+df_dh3$NDVI_Interval <- factor(df_dh3$NDVI_Interval,
+                               levels = levels(dh3),
+                               ordered = TRUE)
+
+# Costruisci il dataframe finale
+df_dh4 <- as.data.frame(table(dh4))
+colnames(df_dh4) <- c("NDVI_Interval", "Count")
+
+# Ordina per intervallo
+df_dh4$NDVI_Interval <- factor(df_dh4$NDVI_Interval,
+                               levels = levels(dh4),
+                               ordered = TRUE)
 
 
+h1 <- ggplot(df_dh1, aes(x = NDVI_Interval, y = Count)) +
+  geom_bar(stat = "identity",  position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+h1
+
+
+h2 <- ggplot(df_dh2, aes(x = NDVI_Interval, y = Count)) +
+  geom_bar(stat = "identity",  position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+h2
+
+h3 <- ggplot(df_dh3, aes(x = NDVI_Interval, y = Count)) +
+  geom_bar(stat = "identity",  position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+h3
+
+
+h4 <- ggplot(df_dh4, aes(x = NDVI_Interval, y = Count)) +
+  geom_bar(stat = "identity",  position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+h4
+
+
+h1+h2+h3+h4
 
 
 
