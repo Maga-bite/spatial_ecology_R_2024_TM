@@ -437,6 +437,8 @@ NDWI_062523_072523 <- (nirband08_062523_072523 - swirband11_062523_072523) / (ni
 NDWI_080923_090923 <- (nirband08_080923_090923 - swirband11_080923_090923) / (nirband08_080923_090923 + swirband11_080923_090923)
 NDWI_092523_102523 <- (nirband08_092523_102523 - swirband11_092523_102523) / (nirband08_092523_102523 + swirband11_092523_102523)
 
+par(mfrow = c(2, 4))
+
 plot(NDWI_051022_060922[[1]], col = clv, main = "NDWI 05.10–06.09 2022")
 plot(NDWI_062522_072522[[1]], col = clv, main = "NDWI 06.25–07.25 2022")
 plot(NDWI_080922_090922[[1]], col = clv, main = "NDWI 08.09–09.09 2022")
@@ -782,43 +784,43 @@ df_dh4$NDVI_Interval <- factor(df_dh4$NDVI_Interval,
                                ordered = TRUE)
 
 
-h1 <- ggplot(df_dh1, aes(x = NDVI_Interval, y = Count)) +
+h1 <- ggplot(df_dh1,  aes(x = NDVI_Interval, y = Count, fill = NDVI_Interval)) +
   geom_bar(stat = "identity",  position = "dodge") + 
   scale_fill_viridis_d(option = "D") + 
   geom_text(aes(label = Count), vjust = -0.3, size = 3) +
-  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  labs(title = "NDVI differences: 05.10–06.09", x = "ΔNDVI interval", y = "Amount of pixels") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
         plot.title = element_text(hjust = 0.5))
 h1
 
 
-h2 <- ggplot(df_dh2, aes(x = NDVI_Interval, y = Count)) +
+h2 <- ggplot(df_dh2, aes(x = NDVI_Interval, y = Count, fill = NDVI_Interval)) +
   geom_bar(stat = "identity",  position = "dodge") + 
   scale_fill_viridis_d(option = "D") + 
   geom_text(aes(label = Count), vjust = -0.3, size = 3) +
-  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  labs(title = "NDVI differences: 06.25–07.25", x = "ΔNDVI interval", y = "Amount of pixels") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
         plot.title = element_text(hjust = 0.5))
 h2
 
-h3 <- ggplot(df_dh3, aes(x = NDVI_Interval, y = Count)) +
+h3 <- ggplot(df_dh3, aes(x = NDVI_Interval, y = Count, fill = NDVI_Interval)) +
   geom_bar(stat = "identity",  position = "dodge") + 
   scale_fill_viridis_d(option = "D") + 
   geom_text(aes(label = Count), vjust = -0.3, size = 3) +
-  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  labs(title = "NDVI differences: 08.09–09.09", x = "ΔNDVI interval", y = "Amount of pixels") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
         plot.title = element_text(hjust = 0.5))
 h3
 
 
-h4 <- ggplot(df_dh4, aes(x = NDVI_Interval, y = Count)) +
+h4 <- ggplot(df_dh4, aes(x = NDVI_Interval, y = Count, fill = NDVI_Interval)) +
   geom_bar(stat = "identity",  position = "dodge") + 
   scale_fill_viridis_d(option = "D") + 
   geom_text(aes(label = Count), vjust = -0.3, size = 3) +
-  labs(title = "NDVI differences", x = "ΔNDVI interval", y = "Amount of pixels") +
+  labs(title = "NDVI differences: 09.25–10.25", x = "ΔNDVI interval", y = "Amount of pixels") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
         plot.title = element_text(hjust = 0.5))
@@ -827,593 +829,66 @@ h4
 
 h1+h2+h3+h4
 
+################################################################################
 
+#values of the single years for the statistical analisis 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#-------------------------------------------------------------------------------
-
-#problem with the classification
-library(imageRy)
-
-Bands_NDVI_051022_060922_class <- im.classify(NDVI_051022_060922, num_clusters = 2)
-Bands_NDVI_062522_072522_class <- im.classify(NDVI_062522_072522, num_clusters = 2)
-Bands_NDVI_080922_090922_class <- im.classify(NDVI_080922_090922, num_clusters = 2)
-Bands_NDVI_092522_102522_class <- im.classify(NDVI_092522_102522, num_clusters = 2)
-
-Bands_NDVI_051023_060923_class <- im.classify(NDVI_051023_060923, num_clusters = 2)
-Bands_NDVI_062523_072523_class <- im.classify(NDVI_062523_072523, num_clusters = 2)
-Bands_NDVI_080923_090923_class <- im.classify(NDVI_080923_090923, num_clusters = 2)
-Bands_NDVI_092523_102523_class <- im.classify(NDVI_092523_102523, num_clusters = 2)
-
-#-------------------------------------------------------------------------------
-
-freq_NDVI_051022_060922 <- freq(Bands_NDVI_051022_060922_class)
-freq_NDVI_062522_072522 <- freq(Bands_NDVI_062522_072522_class)
-freq_NDVI_080922_090922 <- freq(Bands_NDVI_080922_090922_class)
-freq_NDVI_092522_102522 <- freq(Bands_NDVI_092522_102522_class)
-
-freq_NDVI_051023_060923 <- freq(Bands_NDVI_051023_060923_class)
-freq_NDVI_062523_072523 <- freq(Bands_NDVI_062523_072523_class)
-freq_NDVI_080923_090923 <- freq(Bands_NDVI_080923_090923_class)
-freq_NDVI_092523_102523 <- freq(Bands_NDVI_092523_102523_class)
-
-
-tot_NDVI_051022_060922 <- ncell(Bands_NDVI_051022_060922_class)
-tot_NDVI_062522_072522 <- ncell(Bands_NDVI_062522_072522_class)
-tot_NDVI_080922_090922 <- ncell(Bands_NDVI_080922_090922_class)
-tot_NDVI_092522_102522 <- ncell(Bands_NDVI_092522_102522_class)
-
-tot_NDVI_051023_060923 <- ncell(Bands_NDVI_051023_060923_class)
-tot_NDVI_062523_072523 <- ncell(Bands_NDVI_062523_072523_class)
-tot_NDVI_080923_090923 <- ncell(Bands_NDVI_080923_090923_class)
-tot_NDVI_092523_102523 <- ncell(Bands_NDVI_092523_102523_class)
-
-
-
-perc_NDVI_051022_060922 <- freq_NDVI_051022_060922$count * 100 / tot_NDVI_051022_060922
-perc_NDVI_062522_072522 <- freq_NDVI_062522_072522$count * 100 / tot_NDVI_062522_072522
-perc_NDVI_080922_090922 <- freq_NDVI_080922_090922$count * 100 / tot_NDVI_080922_090922
-perc_NDVI_092522_102522 <- freq_NDVI_092522_102522$count * 100 / tot_NDVI_092522_102522
-
-perc_NDVI_051023_060923 <- freq_NDVI_051023_060923$count * 100 / tot_NDVI_051023_060923
-perc_NDVI_062523_072523 <- freq_NDVI_062523_072523$count * 100 / tot_NDVI_062523_072523
-perc_NDVI_080923_090923 <- freq_NDVI_080923_090923$count * 100 / tot_NDVI_080923_090923
-perc_NDVI_092523_102523 <- freq_NDVI_092523_102523$count * 100 / tot_NDVI_092523_102523
-
-
-#should continue like this like in the lessons
-
-class <- c("Forest","Human")
-y1992 <- c(83, 17)
-#this was the percebtage of 1992 let's do 2006
-y2006 <- c(45,55)
-
-#let'sclamp togheter the collumn
-tabout<-data.frame(class, y1992, y2006)
-
-
-
-
-summary(values(difNDWI_09))
-
-valori <- values(difNDWI_09) |>
+val_NDVI_051022_060922 <- values(NDVI_051022_060922) |> 
   na.omit()
-|>  |> |> |> 
-summary(valori)
 
+val_NDVI_062522_072522 <- values(NDVI_062522_072522) |> 
+  na.omit()
 
+val_NDVI_080922_090922 <- values(NDVI_080922_090922) |> 
+  na.omit()
 
+val_NDVI_092522_102522 <- values(NDVI_092522_102522) |>   
+  na.omit()
 
 
+val_NDVI_051023_060923 <- values(NDVI_051023_060923) |> 
+  na.omit()
 
+val_NDVI_062523_072523 <- values(NDVI_062523_072523) |> 
+  na.omit()
 
+val_NDVI_080923_090923 <- values(NDVI_080923_090923) |> 
+  na.omit()
 
+val_NDVI_092523_102523 <- values(NDVI_092523_102523) |>   
+  na.omit()
 
+means_2022 <- c(
+  mean(val_NDVI_051022_060922),
+  mean(val_NDVI_062522_072522),
+  mean(val_NDVI_080922_090922),
+  mean(val_NDVI_092522_102522)
+)
 
+means_2023 <- c(
+  mean(val_NDVI_051023_060923),
+  mean(val_NDVI_062523_072523),
+  mean(val_NDVI_080923_090923),
+  mean(val_NDVI_092523_102523)
+)
 
+t.test(means_2022, means_2023, paired = TRUE)  # paired se stesso periodo
 
+#Paired t-test
 
+#data:  means_2022 and means_2023
+#t = 1.2004, df = 3, p-value = 0.3161
+#alternative hypothesis: true mean difference is not equal to 0
+#95 percent confidence interval:
+#  -0.02783309  0.06154470
+#sample estimates:
+#  mean difference 
+#0.0168558 
 
+wilcox.test(means_2022, means_2023, paired = TRUE)
 
+#Wilcoxon signed rank exact test
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###################################################################################################DA QUI SONO COSE TENTATE E WORK IN PROGRESS CHE NON SERVONO
-
-
-
-
-
-# Now it is time to understand the different impact of the two years
-
-#B2	10 m	490 nm	Blue
-#B3	10 m	560 nm	Green
-#B4	10 m	665 nm	Red
-#B8	10 m	842 nm	Visible and Near Infrared (VNIR)
-
-# Rastering the remaining band needed for the analysis
-tif_B02 <- tif_files[grepl("B02", tif_files)]
-tif_B03 <- tif_files[grepl("B03", tif_files)]
-
-rasters_tif_B02 <- lapply(tif_B02, terra::rast)
-rasters_tif_B03 <- lapply(tif_B03, terra::rast)
-
-
-Bands_051022_060922 <- c(rasters_tif_B04[[1]], rasters_tif_B03[[1]], rasters_tif_B02[[1]], rasters_tif_B08[[1]])
-
-#Bands_062522_072522 <- c(rasters_tif_B04[[2]], rasters_tif_B03[[2]], rasters_tif_B02[[2]], rasters_tif_B08[[2]])
-
-# Scegli un CRS di riferimento comune, ad esempio quello di B04
-crs_ref <- terra::crs(rasters_tif_B04[[2]])
-
-# Proietta TUTTI i raster su questo CRS
-b4_proj <- terra::project(rasters_tif_B04[[2]], crs_ref)
-b3_proj <- terra::project(rasters_tif_B03[[2]], crs_ref)
-b2_proj <- terra::project(rasters_tif_B02[[2]], crs_ref)
-b8_proj <- terra::project(rasters_tif_B08[[2]], crs_ref)
-
-# Usa B04 proiettato come riferimento per il resample
-b3_res <- terra::resample(b3_proj, b4_proj)
-b2_res <- terra::resample(b2_proj, b4_proj)
-b8_res <- terra::resample(b8_proj, b4_proj)
-
-# Ora combini tutti i raster proiettati e riallineati
-Bands_062522_072522 <- c(b4_proj, b3_res, b2_res, b8_res)
-
-Bands_080922_090922 <- c(rasters_tif_B04[[3]], rasters_tif_B03[[3]], rasters_tif_B02[[3]], rasters_tif_B08[[3]])
-Bands_092522_102522 <- c(rasters_tif_B04[[4]], rasters_tif_B03[[4]], rasters_tif_B02[[4]], rasters_tif_B08[[4]])
-
-Bands_051023_060923 <- c(rasters_tif_B04[[5]], rasters_tif_B03[[5]], rasters_tif_B02[[5]], rasters_tif_B08[[5]])
-Bands_062523_072523 <- c(rasters_tif_B04[[6]], rasters_tif_B03[[6]], rasters_tif_B02[[6]], rasters_tif_B08[[6]])
-Bands_080923_090923 <- c(rasters_tif_B04[[7]], rasters_tif_B03[[7]], rasters_tif_B02[[7]], rasters_tif_B08[[7]])
-Bands_092523_102523 <- c(rasters_tif_B04[[8]], rasters_tif_B03[[8]], rasters_tif_B02[[8]], rasters_tif_B08[[8]])
-
-library(imageRy)
-
-Bands_051022_060922_class <- im.classify(Bands_051022_060922, num_clusters = 5)
-Bands_062522_072522_class <- im.classify(Bands_062522_072522, num_clusters = 5)
-Bands_080922_090922_class <- im.classify(Bands_080922_090922, num_clusters = 5)
-Bands_092522_102522_class <- im.classify(Bands_092522_102522, num_clusters = 5)
-Bands_051023_060923_class <- im.classify(Bands_051023_060923, num_clusters = 5)
-Bands_062523_072523_class <- im.classify(Bands_062523_072523, num_clusters = 5)
-Bands_080923_090923_class <- im.classify(Bands_080923_090923, num_clusters = 5)
-Bands_092523_102523_class <- im.classify(Bands_092523_102523, num_clusters = 5)
-
-# Plot delle classificazioni
-par(mfrow)
-plot(Bands_051022_060922_class)
-plot(Bands_062522_072522_class)
-plot(Bands_080922_090922_class)
-plot(Bands_092522_102522_class)
-plot(Bands_051023_060923_class)
-plot(Bands_062523_072523_class)
-plot(Bands_080923_090923_class)
-plot(Bands_092523_102523_class)
-
-
-
-#_______________________________________________________________________________
-#this cycle of commands plots even the single bands so it can be seen which are critical
-#the plots that gives a warning or an error are re-downloaded but there are images that are not being downloaded correclty for their composites
-
-#for (i in seq_along(rasters_files)) {
-#  cat("Plotting raster", i, "\n")
-#  tryCatch({
-#    plot(rasters_files[[i]], stretch = "lin")
-#  }, error = function(e) {
-#    cat("Xo Error in raster", i, ":", conditionMessage(e), "\n")
-#  }, warning = function(w) {
-#    cat(":O Warning in raster", i, ":", conditionMessage(w), "\n")
-#  })
-#}
-
-## WARNING: The following Sentinel-2 files are corrupted and must be re-downloaded.
-# Critical date ranges and required bands/composites:
-# - 2022-06-25 to 2022-07-25: Bands B02, B05, B06, B08, B11, B8A + False_color, True_color composites
-# - 2023-05-10 to 2023-06-09: Bands B02, B03, B04, B05, B06, B08, B11, B12, B8A + False_color, True_color composites
-# Now that the rasters are mostly working,g we need to load and create the composite rasters that are not being downloaded correctly
-
-#_______________________________________________________________________________
-
-#par(mfrow=c(2,4))
-#plotRGB(rasters_NDVI[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[3]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_NDVI[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-
-#_______________________________________________________________________________
-
-#par(mfrow=c(2,4))
-#plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error
-#plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-
-##par(mfrow=c(2,4))
-#plotRGB(rasters_false_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
-#plotRGB(rasters_false_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[6]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_false_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-#_______________________________________________________________________________
-
-#par(mfrow=c(2,4))
-#plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[3]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
-#plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[6]], r = 1, g = 2, b = 3, stretch = "lin") #error not plotting
-#plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-# working on the natural color trough the bands
-
-# Final multiframe for True color
-#par(mfrow=c(2,4))
-#plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-#plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[5]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-#plotRGB(rasters_true_color[[7]], r = 1, g = 2, b = 3, stretch = "lin")
-#plotRGB(rasters_true_color[[8]], r = 1, g = 2, b = 3, stretch = "lin")
-
-
-#_______________________________________________________________________________
-
-#cosa che sarebbe stata utile ma non ha funzionato
-
-#si riescono a plottare tutti, in alcuni mostra un multiframe in cui c'è il plot e la zona di raster
-#ora provo a vedere se i raster dei file creano ancora problemi se vengono rivisti dal seguente cosice
-  
-# Percorso dell'eseguibile gdal_translate
-gdal_path <- "C:/2)UNIBO/roba strana per dati tiff/bin/gdal_translate.exe"
-  
-# Cartella dove sono i file .tiff originali
-input_dir <- "C:/Users/Tommy/Documents/altavaltellian"
-  
-# Cartella dove salvare i file riparati
-output_dir <- file.path(input_dir, "riparati")
-  
-# Crea la cartella di output se non esiste
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir)
-}
-  
-# Lista dei file .tiff da convertire
-tif_files <- list.files(input_dir, pattern = "\\.tiff$", full.names = TRUE)
-  
-# Ciclo su tutti i file e li converte
-for (file in tif_files) {
-  filename <- basename(file)
-  output_file <- file.path(output_dir, paste0("fix_", filename))
-    
-  cmd <- sprintf('"%s" "%s" "%s"', gdal_path, file, output_file)
-  cat("➡️ Eseguendo:", cmd, "\n")
-    
-  status <- system(cmd)
-  if (status != 0) {
-    cat("Errore nel convertire:", filename, "\n")
-  } else {
-    cat("Fatto:", filename, "\n")
-  }
-}
-  
-#non ha funzionato quindi vanno riscaricati
-  
-#_______________________________________________________________________________
-  
-
-
-#_______________________________________________________________________________
-
-#
-# VOLEVO CONTROLLARE SE IL BOUNDING BOX FUNZIONA CON LE IMMAGINI SCARICATE
-#
-
-# Load required libraries
-library(terra)    # For raster operations
-library(sf)       # For vector data handling
-library(ggplot2)  # For elegant spatial plotting
-
-# ---------------------------------------------
-# STEP 1: Logical Check - Intersections with all rasters
-# ---------------------------------------------
-
-# Get the CRS from one of the rasters (assuming all share the same CRS)
-crs_raster <- crs(rasters_true_color[[1]])
-
-# Ensure municipalities are projected to the raster's CRS
-selected_municipalities_proj <- st_transform(selected_municipalities, crs = crs_raster)
-
-# Logical check: loop over each raster and test intersection
-intersection_results <- sapply(seq_along(rasters_true_color), function(i) {
-  
-  # Convert raster to polygons (heavy operation!)
-  rast_poly <- as.polygons(rasters_true_color[[i]])
-  rast_poly_sf <- st_as_sf(rast_poly)
-  st_crs(rast_poly_sf) <- crs_raster
-  
-  # Check intersection
-  intersection <- st_intersects(
-    st_geometry(selected_municipalities_proj),
-    st_geometry(rast_poly_sf),sparse = FALSE)
-  
-  any(intersection)
-})
-
-# Show logical vector of which rasters intersect
-print(intersection_results)
-
-#print(intersection_results)
-#[1]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-
-
-# ---------------------------------------------
-# STEP 2: Plotting Example (only for the first intersecting raster)
-# ---------------------------------------------
-
-# Find the index of the first intersecting raster (if any)
-first_valid_index <- which(intersection_results)[1]
-
-if (!is.na(first_valid_index)) {
-  
-  # Convert that raster to polygons
-  example_raster <- rasters_true_color[[first_valid_index]]
-  rast_poly <- as.polygons(example_raster)
-  rast_poly_sf <- st_as_sf(rast_poly)
-  st_crs(rast_poly_sf) <- crs_raster
-  
-  # Plot with ggplot2 — EXAMPLE ONLY
-  ggplot() +
-    geom_sf(data = selected_municipalities_proj, aes(fill = "Municipalities"), 
-            color = "blue", alpha = 0.3) + 
-    geom_sf(data = rast_poly_sf, aes(fill = "Raster"), 
-            color = "red", alpha = 0.1) +
-    theme_minimal() +
-    labs(title = paste("EXAMPLE - Raster", first_valid_index, "and Municipalities of Sondrio Province"),
-         subtitle = "Raster-to-polygon is computationally intensive — done only once here",
-         fill = "Legend") +
-    scale_fill_manual(values = c("Municipalities" = "blue", "Raster" = "red"))
-  
-} else {
-  message("No rasters intersect the selected municipalities.")
-}
-
-#_______________________________________________________________________________
-
-#
-# VOLEVO CONTROLLARE SE IL BOUNDING BOX FUNZIONA CON LE IMMAGINI SCARICATE
-#
-
-# Load required libraries
-library(terra)    # For raster operations
-library(sf)       # For vector data handling
-library(ggplot2)  # For elegant spatial plotting
-
-# ---------------------------------------------
-# STEP 1: Logical Check - Intersections with all rasters
-# ---------------------------------------------
-
-# Get the CRS from one of the rasters (assuming all share the same CRS)
-crs_raster <- crs(rasters_true_color[[1]])
-
-# Ensure municipalities are projected to the raster's CRS
-selected_municipalities_proj <- st_transform(selected_municipalities, crs = crs_raster)
-
-# Logical check: loop over each raster and test intersection
-intersection_results <- sapply(seq_along(rasters_true_color), function(i) {
-  
-  # Convert raster to polygons (heavy operation!)
-  rast_poly <- as.polygons(rasters_true_color[[i]])
-  rast_poly_sf <- st_as_sf(rast_poly)
-  st_crs(rast_poly_sf) <- crs_raster
-  
-  # Check intersection
-  intersection <- st_intersects(
-    st_geometry(selected_municipalities_proj),
-    st_geometry(rast_poly_sf),sparse = FALSE)
-  
-  any(intersection)
-})
-
-# Show logical vector of which rasters intersect
-print(intersection_results)
-
-#print(intersection_results)
-#[1]  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
-
-
-# ---------------------------------------------
-# STEP 2: Plotting Example (only for the first intersecting raster)
-# ---------------------------------------------
-
-# Find the index of the first intersecting raster (if any)
-first_valid_index <- which(intersection_results)[1]
-
-if (!is.na(first_valid_index)) {
-  
-  # Convert that raster to polygons
-  example_raster <- rasters_true_color[[first_valid_index]]
-  rast_poly <- as.polygons(example_raster)
-  rast_poly_sf <- st_as_sf(rast_poly)
-  st_crs(rast_poly_sf) <- crs_raster
-  
-  # Plot with ggplot2 — EXAMPLE ONLY
-  ggplot() +
-    geom_sf(data = selected_municipalities_proj, aes(fill = "Municipalities"), 
-            color = "blue", alpha = 0.3) + 
-    geom_sf(data = rast_poly_sf, aes(fill = "Raster"), 
-            color = "red", alpha = 0.1) +
-    theme_minimal() +
-    labs(title = paste("EXAMPLE - Raster", first_valid_index, "and Municipalities of Sondrio Province"),
-         subtitle = "Raster-to-polygon is computationally intensive — done only once here",
-         fill = "Legend") +
-    scale_fill_manual(values = c("Municipalities" = "blue", "Raster" = "red"))
-  
-} else {
-  message("No rasters intersect the selected municipalities.")
-}
-
-#_______________________________________________________________________________
-
-#MOMENTO SMANETTONE
-# Carica il pacchetto raster
-library(raster)
-
-# Carica l'immagine .tiff
-image_path_trial <- "2022-06-25-00_00_2022-07-24-23_59_Sentinel-2_L2A_True_color.tiff"
-raster_image_trial <- raster(image_path_trial)
-
-image_path_trial2 <-"2022-06-25-00_00_2022-07-24-23_59_Sentinel-2_L2A_False_color.tiff"
-raster_image_trial2 <- raster(image_path_trial2)
-
-# Visualizza l'immagine
-plot(raster_image_trial, main = "Sentinel-2 True Color Image")
-
-#ESEMPIO DI COME ABBIAMO FATTO A LEZIONE MA VA FATTO CON LE BANDE
-difgr = raster_image_trial - raster_image_trial2
-plot(difgr)
-
-#_______________________________________________________________________________
-
-#ESEMPIO DI COME SOVRAPPORRE I PLOT
-
-# Trasforma le geometrie nel CRS del raster
-selected_municipalities <- st_transform(selected_municipalities, crs = crs(raster_image_trial))
-bbox_polygon <- st_transform(bbox_polygon, crs = crs(raster_image_trial))
-
-# Plot raster
-plot(raster_image_trial, main = "Sentinel-2 True Color Image")
-
-# Aggiungi geometrie
-plot(st_geometry(bbox_polygon), add = TRUE, border = "red", lwd = 2)
-plot(st_geometry(selected_municipalities), add = TRUE, 
-     col = NA, border = "blue")
-
+#data:  means_2022 and means_2023
+#V = 8, p-value = 0.375
+#alternative hypothesis: true location shift is not equal to 0
