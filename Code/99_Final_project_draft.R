@@ -1,15 +1,17 @@
+
 # Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
 # Author: Tommaso Magarotto
 
 # Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
-# and climate data, aggregated by season over the last 3 years
+# and climate data, aggregated by season
 
 # The time period we will focus on is from 2022 to 2024
 # During this period, Italy experienced several extreme events, including droughts and floods. 
-# The goal is to assess the impact of these extreme events on mountainous ecosystems, 
-# particularly in relation to their resilience and overall functioning.
+# The goal is to assess the impact of these extreme events on mountainous ecosystems.
 
-# Download the administrative boundaries
+#_______________________________________________________________________________
+
+#Download the administrative boundaries
 
 # Load required libraries
 library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
@@ -70,7 +72,7 @@ st_as_text(st_geometry(bbox_polygon))
 
 # Vegetative awakening (Spring): May 10 – June 9
 # During this phase, the first leaves appear, with flowering and the beginning of growth. 
-# The NDVI (Normalized Difference Vegetation Index) should show rapid growth.
+# The NDVI (Normalized Difference Vegetation Index) should show low intensity but followed to a rapid growth.
 #
 # Maximum activity (Early Summer): June 25 – July 24
 # This is the period of maximum photosynthesis, with full leaf coverage. NDVI reaches its peak.
@@ -83,20 +85,17 @@ st_as_text(st_geometry(bbox_polygon))
 #
 # The selected time intervals for each phase correspond to approximately 30 days, representing the critical periods of 
 # plant growth, stress, and senescence. These will be used to analyze the impact of drought on vegetation over the years. 
-# This approach helps monitor the seasonal evolution of NDVI and identify anomalies related to extreme events (drought, floods) 
-# observed in Italy between 2022 and 2023.
+# This approach helps monitor the seasonal evolution of NDVI and identify anomalies in Italy between 2022 and 2023.
 
 
 #Image format:
 
 #Summary of the downloaded images:
-#layer: True Color, NDVI, False Color (urban)
-#single bands B03, B04, B05, B06 B08, B08A B11, B12
 #TIFF (32-bit float)
-#Image resolution: HIGH
-#2500 x 2308 px
-#Coordinate system:
-#UTM 32N (EPSG:32632)
+#layer: True Color, NDVI, False Color (urban)
+#single bands B02, B03, B04, B05, B06 B08, B08A B11, B12
+#Image resolution: HIGH 2500 x 2308 px
+#Coordinate system: UTM 32N (EPSG:32632)
 #Projected resolution: 18 m/px
 # Data mask
 
@@ -931,7 +930,6 @@ val_NDVI_080922_090922 <- values(NDVI_080922_090922) |>
 val_NDVI_092522_102522 <- values(NDVI_092522_102522) |>   
   na.omit()
 
-
 val_NDVI_051023_060923 <- values(NDVI_051023_060923) |> 
   na.omit()
 
@@ -954,16 +952,32 @@ val_NDVI_092523_102523 <- values(NDVI_092523_102523) |>
 # distributions between the two periods.
 
 wilcox.test(val_NDVI_051022_060922, val_NDVI_051023_060923, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDVI_051022_060922 and val_NDVI_051023_060923
+#W = 1.6496e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDVI_062522_072522, val_NDVI_062523_072523, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDVI_062522_072522 and val_NDVI_062523_072523
+#W = 1.703e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDVI_080922_090922, val_NDVI_080923_090923, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDVI_080922_090922 and val_NDVI_080923_090923
+#W = 1.6302e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDVI_092522_102522, val_NDVI_092523_102523, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDVI_092522_102522 and val_NDVI_092523_102523
+#W = 1.4717e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 
 # All Wilcoxon rank-sum tests indicate statistically significant differences 
-# in the distribution of NDVI values between 2022 and 2023 for each time period analyzed. 
+# in the distribution of NDVI values between 2022 and 2023 for each period analyzed. 
 # This suggests that vegetation activity varied between the two years, 
 # likely due to climatic conditions or environmental disturbances.
 # 
@@ -1003,160 +1017,39 @@ val_NDWI_092523_102523 <- values(NDWI_092523_102523) |>
 # paired = FALSE perché le posizioni dei pixel potrebbero non corrispondere esattamente
 
 wilcox.test(val_NDWI_051022_060922, val_NDWI_051023_060923, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDWI_051022_060922 and val_NDWI_051023_060923
+#W = 1.5385e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDWI_062522_072522, val_NDWI_062523_072523_resampled, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDWI_062522_072522 and val_NDWI_062523_072523_resampled
+#W = 1.4901e+13, p-value < 2.2e-16
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDWI_080922_090922, val_NDWI_080923_090923, paired = FALSE)
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDWI_080922_090922 and val_NDWI_080923_090923
+#W = 1.58e+13, p-value = 1.184e-05
+#alternative hypothesis: true location shift is not equal to 0
 
 wilcox.test(val_NDWI_092522_102522, val_NDWI_092523_102523, paired = FALSE)
-
-
-
-
-################################################################################
-
-> wilcox.test(val_NDVI_051022_060922, val_NDVI_051023_060923, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDVI_051022_060922 and val_NDVI_051023_060923
-W = 1.6496e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDVI_062522_072522, val_NDVI_062523_072523, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDVI_062522_072522 and val_NDVI_062523_072523
-W = 1.703e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDVI_080922_090922, val_NDVI_080923_090923, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDVI_080922_090922 and val_NDVI_080923_090923
-W = 1.6302e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDVI_092522_102522, val_NDVI_092523_102523, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDVI_092522_102522 and val_NDVI_092523_102523
-W = 1.4717e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> # Estrazione dei valori dei singoli anni per NDWI
-  > 
-  > val_NDWI_051022_060922 <- values(NDWI_051022_060922) |> 
-  +   na.omit()
-> 
-  > val_NDWI_062522_072522 <- values(NDWI_062522_072522) |> 
-  +   na.omit()
-> 
-  > val_NDWI_080922_090922 <- values(NDWI_080922_090922) |> 
-  +   na.omit()
-> 
-  > val_NDWI_092522_102522 <- values(NDWI_092522_102522) |>   
-  +   na.omit()
-> 
-  > 
-  > val_NDWI_051023_060923 <- values(NDWI_051023_060923) |> 
-  +   na.omit()
-> 
-  > val_NDWI_062523_072523_resampled <- values(NDWI_062523_072523_resampled) |> 
-  +   na.omit()
-> 
-  > val_NDWI_080923_090923 <- values(NDWI_080923_090923) |> 
-  +   na.omit()
-> 
-  > val_NDWI_092523_102523 <- values(NDWI_092523_102523) |>   
-  +   na.omit()
-> 
-  > 
-  > # Test di Wilcoxon rank-sum per confrontare i valori NDWI tra gli anni
-  > # paired = FALSE perché le posizioni dei pixel potrebbero non corrispondere esattamente
-  > 
-  > wilcox.test(val_NDWI_051022_060922, val_NDWI_051023_060923, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDWI_051022_060922 and val_NDWI_051023_060923
-W = 1.5385e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDWI_062522_072522, val_NDWI_062523_072523_resampled, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDWI_062522_072522 and val_NDWI_062523_072523_resampled
-W = 1.4901e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDWI_080922_090922, val_NDWI_080923_090923, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDWI_080922_090922 and val_NDWI_080923_090923
-W = 1.58e+13, p-value = 1.184e-05
-alternative hypothesis: true location shift is not equal to 0
-
-> 
-  > wilcox.test(val_NDWI_092522_102522, val_NDWI_092523_102523, paired = FALSE)
-
-Wilcoxon rank sum test with continuity correction
-
-data:  val_NDWI_092522_102522 and val_NDWI_092523_102523
-W = 1.8872e+13, p-value < 2.2e-16
-alternative hypothesis: true location shift is not equal to 0
-
-################################################################################
-
-
-
-
-
-
-
-
-
-means_2022 <- c(
-  mean(val_NDVI_051022_060922),
-  mean(val_NDVI_062522_072522),
-  mean(val_NDVI_080922_090922),
-  mean(val_NDVI_092522_102522)
-)
-
-means_2023 <- c(
-  mean(val_NDVI_051023_060923),
-  mean(val_NDVI_062523_072523),
-  mean(val_NDVI_080923_090923),
-  mean(val_NDVI_092523_102523)
-)
-
-t.test(means_2022, means_2023, paired = FALSE)  # paired se stesso periodo
-
-#Paired t-test
-
-#data:  means_2022 and means_2023
-#t = 1.2004, df = 3, p-value = 0.3161
-#alternative hypothesis: true mean difference is not equal to 0
-#95 percent confidence interval:
-#  -0.02783309  0.06154470
-#sample estimates:
-#  mean difference 
-#0.0168558 
-
-wilcox.test(means_2022, means_2023, paired = TRUE)
-
-#Wilcoxon signed rank exact test
-
-#data:  means_2022 and means_2023
-#V = 8, p-value = 0.375
+#Wilcoxon rank sum test with continuity correction
+#data:  val_NDWI_092522_102522 and val_NDWI_092523_102523
+#W = 1.8872e+13, p-value < 2.2e-16
 #alternative hypothesis: true location shift is not equal to 0
+
+
+# Summary of Wilcoxon rank-sum test results (NDVI and NDWI comparisons between 2022 and 2023):
+#
+# All NDVI comparisons between the same seasonal periods in 2022 and 2023 show statistically significant 
+# differences (p-value < 2.2e-16) suggest a substantial vegetation activity shift across all periods.
+#
+# Similarly, all NDWI comparisons show statistically significant differences as well. Three out of four 
+# periods have p-values < 2.2e-16, while the remaining period (August–September) still shows significance 
+# (p = 1.184e-05), indicating consistent changes in vegetation water content.
+#
+# These results support the hypothesis that environmental factors, such as drought or climate anomalies, had 
+# a measurable impact on vegetation conditions in the study area between 2022 and 2023.
+
