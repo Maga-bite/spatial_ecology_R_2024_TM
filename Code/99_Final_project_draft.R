@@ -403,6 +403,8 @@ NDVI_062523_072523 <- (nirband08_062523_072523 - redband04_062523_072523) / (nir
 NDVI_080923_090923 <- (nirband08_080923_090923 - redband04_080923_090923) / (nirband08_080923_090923 + redband04_080923_090923)
 NDVI_092523_102523 <- (nirband08_092523_102523 - redband04_092523_102523) / (nirband08_092523_102523 + redband04_092523_102523)
 
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
+
 plot(NDVI_051022_060922[[1]], col = clv, main = "NDVI 05.10–06.09 2022")
 plot(NDVI_062522_072522[[1]], col = clv, main = "NDVI 06.25–07.25 2022")
 plot(NDVI_080922_090922[[1]], col = clv, main = "NDVI 08.09–09.09 2022")
@@ -437,7 +439,7 @@ NDWI_062523_072523 <- (nirband08_062523_072523 - swirband11_062523_072523) / (ni
 NDWI_080923_090923 <- (nirband08_080923_090923 - swirband11_080923_090923) / (nirband08_080923_090923 + swirband11_080923_090923)
 NDWI_092523_102523 <- (nirband08_092523_102523 - swirband11_092523_102523) / (nirband08_092523_102523 + swirband11_092523_102523)
 
-par(mfrow = c(2, 4))
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
 
 plot(NDWI_051022_060922[[1]], col = clv, main = "NDWI 05.10–06.09 2022")
 plot(NDWI_062522_072522[[1]], col = clv, main = "NDWI 06.25–07.25 2022")
@@ -479,10 +481,10 @@ difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
 difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
 
 par(mfrow = c(2, 2))
-plot(difNDWI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
-plot(difNDWI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
-plot(difNDWI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
-plot(difNDWI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
+plot(difNDWI_05[[1]], col = clv, main = "NDWI Diff: 05.10–06.09")
+plot(difNDWI_06[[1]], col = clv, main = "NDWI Diff: 06.25–07.25")
+plot(difNDWI_08[[1]], col = clv, main = "NDWI Diff: 08.09–09.09")
+plot(difNDWI_09[[1]], col = clv, main = "NDWI Diff: 09.25–10.25")
 
 
 #_______________________________________________________________________________
@@ -829,9 +831,93 @@ h4
 
 h1+h2+h3+h4
 
+#_______________________________________________________________________________
+
+
+# Calcolo delle differenze NDWI (ΔNDWI) tra anni per gli stessi periodi fenologici
+
+val_difNDWI_05 <- values(difNDWI_05) |> 
+  na.omit()
+
+val_difNDWI_06 <- values(difNDWI_06) |> 
+  na.omit()
+
+val_difNDWI_08 <- values(difNDWI_08) |> 
+  na.omit()
+
+val_difNDWI_09 <- values(difNDWI_09) |> 
+  na.omit()
+
+summary(val_difNDWI_05)
+summary(val_difNDWI_06)
+summary(val_difNDWI_08)
+summary(val_difNDWI_09)
+
+dhw1 <- categorize_ndvi_diff(val_difNDWI_05)
+dhw2 <- categorize_ndvi_diff(val_difNDWI_06)
+dhw3 <- categorize_ndvi_diff(val_difNDWI_08)
+dhw4 <- categorize_ndvi_diff(val_difNDWI_09)
+
+# Costruzione dei dataframe
+df_dhw1 <- as.data.frame(table(dhw1))
+colnames(df_dhw1) <- c("NDWI_Interval", "Count")
+df_dhw1$NDWI_Interval <- factor(df_dhw1$NDWI_Interval, levels = levels(dhw1), ordered = TRUE)
+
+df_dhw2 <- as.data.frame(table(dhw2))
+colnames(df_dhw2) <- c("NDWI_Interval", "Count")
+df_dhw2$NDWI_Interval <- factor(df_dhw2$NDWI_Interval, levels = levels(dhw2), ordered = TRUE)
+
+df_dhw3 <- as.data.frame(table(dhw3))
+colnames(df_dhw3) <- c("NDWI_Interval", "Count")
+df_dhw3$NDWI_Interval <- factor(df_dhw3$NDWI_Interval, levels = levels(dhw3), ordered = TRUE)
+
+df_dhw4 <- as.data.frame(table(dhw4))
+colnames(df_dhw4) <- c("NDWI_Interval", "Count")
+df_dhw4$NDWI_Interval <- factor(df_dhw4$NDWI_Interval, levels = levels(dhw4), ordered = TRUE)
+
+# Visualizzazione
+hw1 <- ggplot(df_dhw1, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDWI differences: 05.10–06.09", x = "ΔNDWI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+hw2 <- ggplot(df_dhw2, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDWI differences: 06.25–07.25", x = "ΔNDWI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+hw3 <- ggplot(df_dhw3, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDWI differences: 08.09–09.09", x = "ΔNDWI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+hw4 <- ggplot(df_dhw4, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) +
+  geom_bar(stat = "identity", position = "dodge") + 
+  scale_fill_viridis_d(option = "D") + 
+  geom_text(aes(label = Count), vjust = -0.3, size = 3) +
+  labs(title = "NDWI differences: 09.25–10.25", x = "ΔNDWI interval", y = "Amount of pixels") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+        plot.title = element_text(hjust = 0.5))
+
+hw1 + hw2 + hw3 + hw4
+
+
 ################################################################################
 
-#values of the single years for the statistical analisis 
+# Values of the single years for the statistical analisis 
 
 val_NDVI_051022_060922 <- values(NDVI_051022_060922) |> 
   na.omit()
@@ -858,6 +944,188 @@ val_NDVI_080923_090923 <- values(NDVI_080923_090923) |>
 val_NDVI_092523_102523 <- values(NDVI_092523_102523) |>   
   na.omit()
 
+
+# Using the Wilcoxon rank-sum test (Mann-Whitney) with paired = FALSE 
+# because the two NDVI images being compared come from the same period 
+# in different years but may not have perfectly matching pixel positions 
+# or identical sample sizes. This non-parametric test does not assume 
+# normality and is robust to non-Gaussian distributions and outliers, 
+# making it suitable for comparing overall differences in NDVI 
+# distributions between the two periods.
+
+wilcox.test(val_NDVI_051022_060922, val_NDVI_051023_060923, paired = FALSE)
+
+wilcox.test(val_NDVI_062522_072522, val_NDVI_062523_072523, paired = FALSE)
+
+wilcox.test(val_NDVI_080922_090922, val_NDVI_080923_090923, paired = FALSE)
+
+wilcox.test(val_NDVI_092522_102522, val_NDVI_092523_102523, paired = FALSE)
+
+
+# All Wilcoxon rank-sum tests indicate statistically significant differences 
+# in the distribution of NDVI values between 2022 and 2023 for each time period analyzed. 
+# This suggests that vegetation activity varied between the two years, 
+# likely due to climatic conditions or environmental disturbances.
+# 
+# The Wilcoxon test does not indicate the direction of the change, 
+# so to better understand the magnitude and trend of NDVI differences, 
+
+
+# Estrazione dei valori dei singoli anni per NDWI
+
+val_NDWI_051022_060922 <- values(NDWI_051022_060922) |> 
+  na.omit()
+
+val_NDWI_062522_072522 <- values(NDWI_062522_072522) |> 
+  na.omit()
+
+val_NDWI_080922_090922 <- values(NDWI_080922_090922) |> 
+  na.omit()
+
+val_NDWI_092522_102522 <- values(NDWI_092522_102522) |>   
+  na.omit()
+
+
+val_NDWI_051023_060923 <- values(NDWI_051023_060923) |> 
+  na.omit()
+
+val_NDWI_062523_072523_resampled <- values(NDWI_062523_072523_resampled) |> 
+  na.omit()
+
+val_NDWI_080923_090923 <- values(NDWI_080923_090923) |> 
+  na.omit()
+
+val_NDWI_092523_102523 <- values(NDWI_092523_102523) |>   
+  na.omit()
+
+
+# Test di Wilcoxon rank-sum per confrontare i valori NDWI tra gli anni
+# paired = FALSE perché le posizioni dei pixel potrebbero non corrispondere esattamente
+
+wilcox.test(val_NDWI_051022_060922, val_NDWI_051023_060923, paired = FALSE)
+
+wilcox.test(val_NDWI_062522_072522, val_NDWI_062523_072523_resampled, paired = FALSE)
+
+wilcox.test(val_NDWI_080922_090922, val_NDWI_080923_090923, paired = FALSE)
+
+wilcox.test(val_NDWI_092522_102522, val_NDWI_092523_102523, paired = FALSE)
+
+
+
+
+################################################################################
+
+> wilcox.test(val_NDVI_051022_060922, val_NDVI_051023_060923, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDVI_051022_060922 and val_NDVI_051023_060923
+W = 1.6496e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDVI_062522_072522, val_NDVI_062523_072523, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDVI_062522_072522 and val_NDVI_062523_072523
+W = 1.703e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDVI_080922_090922, val_NDVI_080923_090923, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDVI_080922_090922 and val_NDVI_080923_090923
+W = 1.6302e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDVI_092522_102522, val_NDVI_092523_102523, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDVI_092522_102522 and val_NDVI_092523_102523
+W = 1.4717e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> # Estrazione dei valori dei singoli anni per NDWI
+  > 
+  > val_NDWI_051022_060922 <- values(NDWI_051022_060922) |> 
+  +   na.omit()
+> 
+  > val_NDWI_062522_072522 <- values(NDWI_062522_072522) |> 
+  +   na.omit()
+> 
+  > val_NDWI_080922_090922 <- values(NDWI_080922_090922) |> 
+  +   na.omit()
+> 
+  > val_NDWI_092522_102522 <- values(NDWI_092522_102522) |>   
+  +   na.omit()
+> 
+  > 
+  > val_NDWI_051023_060923 <- values(NDWI_051023_060923) |> 
+  +   na.omit()
+> 
+  > val_NDWI_062523_072523_resampled <- values(NDWI_062523_072523_resampled) |> 
+  +   na.omit()
+> 
+  > val_NDWI_080923_090923 <- values(NDWI_080923_090923) |> 
+  +   na.omit()
+> 
+  > val_NDWI_092523_102523 <- values(NDWI_092523_102523) |>   
+  +   na.omit()
+> 
+  > 
+  > # Test di Wilcoxon rank-sum per confrontare i valori NDWI tra gli anni
+  > # paired = FALSE perché le posizioni dei pixel potrebbero non corrispondere esattamente
+  > 
+  > wilcox.test(val_NDWI_051022_060922, val_NDWI_051023_060923, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDWI_051022_060922 and val_NDWI_051023_060923
+W = 1.5385e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDWI_062522_072522, val_NDWI_062523_072523_resampled, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDWI_062522_072522 and val_NDWI_062523_072523_resampled
+W = 1.4901e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDWI_080922_090922, val_NDWI_080923_090923, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDWI_080922_090922 and val_NDWI_080923_090923
+W = 1.58e+13, p-value = 1.184e-05
+alternative hypothesis: true location shift is not equal to 0
+
+> 
+  > wilcox.test(val_NDWI_092522_102522, val_NDWI_092523_102523, paired = FALSE)
+
+Wilcoxon rank sum test with continuity correction
+
+data:  val_NDWI_092522_102522 and val_NDWI_092523_102523
+W = 1.8872e+13, p-value < 2.2e-16
+alternative hypothesis: true location shift is not equal to 0
+
+################################################################################
+
+
+
+
+
+
+
+
+
 means_2022 <- c(
   mean(val_NDVI_051022_060922),
   mean(val_NDVI_062522_072522),
@@ -872,7 +1140,7 @@ means_2023 <- c(
   mean(val_NDVI_092523_102523)
 )
 
-t.test(means_2022, means_2023, paired = TRUE)  # paired se stesso periodo
+t.test(means_2022, means_2023, paired = FALSE)  # paired se stesso periodo
 
 #Paired t-test
 
