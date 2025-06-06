@@ -696,7 +696,6 @@ NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_06
 #----------------------------------------------------
 
 # === NDWI ===
-
 difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
 difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
 difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
