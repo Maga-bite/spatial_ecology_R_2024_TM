@@ -66,7 +66,7 @@ bbox_polygon <- st_sf(geometry = bbox_polygon, crs = st_crs(selected_municipalit
 
 # Plot the bounding box (in red) and the selected municipalities (in transparent blue)
 # This helps visualize how the municipalities are spatially distributed inside the bbox
-# st_geometry() gives back the polygon  without the extra collumns, usefull for drawing and analyzing  spatial components
+# st_geometry() gives back the polygon  without the extra columns, useful for drawing and analyzing  spatial components
 plot(st_geometry(bbox_polygon), border = "red", lwd = 2, 
      main = "Bounding Box + Selected Municipalities (GADM)")
 plot(st_geometry(selected_municipalities), add = TRUE, 
@@ -76,19 +76,18 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 # Useful for logging, sharing geometry in text form, or using in GIS software
 st_as_text(st_geometry(bbox_polygon))
 
-#"POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
+# "POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
 
 #_______________________________________________________________________________
 
-#Images format:
-
-#Summary of the downloaded images:
-#TIFF (32-bit float)
-#layer: True Color, NDVI, False Color (urban)
-#single bands B02, B03, B04, B05, B06 B08, B08A B11, B12
-#Image resolution: HIGH 2500 x 2308 px
-#Coordinate system: UTM 32N (EPSG:32632)
-#Projected resolution: 18 m/px
+#  Image format:
+# Summary of the downloaded images:
+# TIFF (32-bit float)
+# layer: True Color, NDVI, False Color (urban)
+# single bands B02, B03, B04, B05, B06 B08, B08A B11, B12
+# Image resolution: HIGH 2500 x 2308 px
+# Coordinate system: UTM 32N (EPSG:32632)
+# Projected resolution: 18 m/px
 # Data mask
 
 # Plant seasonal phases considerations
@@ -185,12 +184,12 @@ plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "li
 
 # 3-----------------------------------------------------------------------------
 rasters_true_color[[3]]
-#source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_True_color.tiff
+# source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_True_color.tiff
 names(rasters_files[[25]])
 names(rasters_files[[26]])
 names(rasters_files[[27]])
 
-# loading rasters corresponding to the bands of true color
+# Loading rasters corresponding to the bands of true color
 b2_2289_2299 <- rasters_files[[25]][[1]]  # Blue
 b3_2289_2299 <- rasters_files[[26]][[1]]  # Green
 b4_2289_2299 <- rasters_files[[27]][[1]]  # Red
@@ -211,12 +210,12 @@ plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "his
 
 # 6-----------------------------------------------------------------------------
 rasters_true_color[[6]]
-#source: 2023-06-25-00_00_2023-07-25-23_59_Sentinel-2_L2A_True_color.tiff 
+# source: 2023-06-25-00_00_2023-07-25-23_59_Sentinel-2_L2A_True_color.tiff 
 names(rasters_files[[61]])
 names(rasters_files[[62]])
 names(rasters_files[[63]])
 
-# loading rasters corresponding to the bands of true color
+# Loading rasters corresponding to the bands of true color
 b2_23625_23725 <- rasters_files[[61]][[1]]  # Blue
 b3_23625_23725 <- rasters_files[[62]][[1]]  # Green
 b4_23625_23725 <- rasters_files[[63]][[1]]  # Red
@@ -268,7 +267,7 @@ mtext("True Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 
 dev.off()
 
-#False color final
+# False color final
 
 par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
 
@@ -299,7 +298,7 @@ mtext("False Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 
 dev.off()
 
-#NDVI final 
+# NDVI already composite final 
 
 par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
 
@@ -334,10 +333,8 @@ dev.off()
 
 # Now it is time to understand the different impact of the two years
 # We want to see the differences in the photosynthetic activity
-# So it is needed, the classification of the true color map in a way that let us 
+# So it is needed, the classification of the true color map in a way that lets us 
 # have a preliminary search on the condition of the forests.
-
-# Later we are going to analyse the values of the NDVI.
 
 # Required libraries: imageRy
 
@@ -350,9 +347,9 @@ Freq_TC_051022_060922_class
 Tot_TC_051022_060922_class <- ncell(Bands_TC_051022_060922_class)
 P_TC_051022_060922_class = Freq_TC_051022_060922_class[3]*100/Tot_TC_051022_060922_class #the third column is the count for each pixel
 P_TC_051022_060922_class
-#1 41.68983 these are mountains' peak
-#2 28.56901 these are denser forests
-#3 29.74116 these are high altitude pastures and villages that still have a percentage of cement
+#1 41.68983 These are mountains' peak
+#2 28.56901 These are denser forests
+#3 29.74116 These are high-altitude pastures and villages that still have a percentage of cement
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[2]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -381,7 +378,7 @@ P_TC_080922_090922_class
 #2  4.6405546 cloud coverage on the mountain top
 #3  0.3673657 X
 #4 23.1041075 stone and villages
-#5 35.1109532 montain top
+#5 35.1109532 mountain top
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[4]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -409,7 +406,7 @@ P_TC_051023_060923_class
 #2 14.960087 border of the forest and stone
 #3 19.869116 denser vegetation
 #4 43.439324 cloud coverage and mountain top
-#5 16.819705 less denser vegetation
+#5 16.819705 less dense vegetation
 
 par(mfrow = c(1,2))
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
@@ -454,7 +451,7 @@ P_TC_092523_102523_class
 
 #--------------------------------------------------------------------------------
 
-# Vizualization of the percentage
+# Visualization of the percentage
 # Required libraries: ggplot2, patchwork and tidyr
 
 class <- c("Dense vegetation","Baren terrain")
@@ -539,10 +536,10 @@ g1 + g2
 # vegetation and water stress indices (NDVI and NDWI) across different seasonal periods 
 #
 # Corresponding bands to Red (B04), Near Infrared (B08), and SWIR (B11) bands 
-# are filtered and loaded as raster layers and then they are grouped by time periods.
+# are filtered and loaded as raster layers, and then grouped by periods.
 #
 # NDVI is computed using Red and NIR bands, while NDWI is computed using NIR and SWIR bands.
-# Some rasters needed to be reprojected to a common CRS to allow for correct mathematical 
+# Some rasters must be reprojected to a common CRS to allow for correct mathematical 
 # operations. Finally, difference maps are created to assess temporal variation in vegetation 
 # and water stress between the two years, and results are visualized in a comparative layout.
 
@@ -605,7 +602,7 @@ swirband11_092523_102523 <- rasters_tif_B11[[8]][[1]]
 # NDVI = (NIR - Red) / (NIR + Red)
 
 # From previous errors, some files needed to be reprojected on the CRS
-# Mainly the NIR in degrees reprogected on the RED band in meters
+# Mainly the NIR in degrees reprojected on the RED band in meters
 nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
 NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
 
@@ -717,8 +714,8 @@ dev.off()
 # NDVI and NDWI values range from +1.0 to -1.0. 
 
 # Areas of barren rock, sand, or snow usually
-# show very low NDVI values (for example, 0.1 or less). Sparse vegetation such as 
-# shrubs and grasslands or senescing crops may result in moderate NDVI values 
+# show very low NDVI values (for example, 0.1 or less). Sparse vegetation, such as 
+# shrubs and grasslands or senescing crops, may result in moderate NDVI values 
 # (approximately 0.2 to 0.5). High NDVI values (approximately 0.6 to 0.9) 
 # correspond to dense vegetation such as that found in temperate and tropical 
 # forests or crops at their peak growth stage. 
@@ -732,7 +729,7 @@ dev.off()
 #   < 0   --> Decrease in vegetation activity (possible stress or degradation)
 #   > 0   --> Increase in vegetation activity (growth, recovery)
 #   Values near -1 or -2 indicate drastic decline (e.g., total vegetation loss)
-#   Values near +1 or +2 indicate strong increase (e.g., new growth or recovery)
+#   Values near +1 or +2 indicate a strong increase (e.g., new growth or recovery)
 
 val_difNDVI_05 <- values(difNDVI_05) |> 
   na.omit()
@@ -931,7 +928,7 @@ hw1 + hw2 + hw3 + hw4
 
 #_______________________________________________________________________________
 
-# Values of the single years for the statistical analisis 
+# Values of the single years for the statistical analysis 
 
 val_NDVI_051022_060922 <- values(NDVI_051022_060922) |> 
   na.omit()
