@@ -1,4 +1,3 @@
-
 # Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
 # Author: Tommaso Magarotto
 
@@ -11,25 +10,39 @@
 
 #_______________________________________________________________________________
 
-#Download the administrative boundaries
+# Uncomment and run the following line if you haven't installed the packages yet:
+# install.packages(c("sf", "geodata", "viridis", "imageRy", "tidyr", "ggplot2", "patchwork", "raster", "terra"))
 
-# Load required libraries
-library(sf)         # for handling spatial vector data (e.g., polygons, shapefiles)
-library(geodata)    # for downloading administrative boundaries (GADM dataset)
-# Palette viridis
-library(viridis)
-clv <- viridis(100)
+
+library(sf)         # For handling spatial vector data (e.g., polygons, shapefiles)
+library(geodata)    # For downloading administrative boundaries (e.g., GADM dataset)
+library(viridis)    # Color palettes optimized for visibility and accessibility
+library(imageRy)    # Used for working with raster/image data, in this case for working with the classification of true color images
+library(tidyr)      # For data wrangling and reshaping
+library(ggplot2)    # For creating elegant data visualizations
+library(patchwork)  # For combining multiple ggplot2 plots
+library(raster)     # For working with raster data (e.g., satellite images)
+library(terra)      # Newer alternative to 'raster' for raster and vector data
+
+clv <- viridis(100)  # Create a continuous viridis color palette with 100 values
+
+#_______________________________________________________________________________
+
+# === Download the administrative boundaries ===
+# Required libraries: sf and geodata
 
 # Download the administrative boundaries of Italy - level 3 (i.e., municipalities)
 # 'level = 3' gives you the most detailed administrative unit (municipalities)
 # 'path = tempdir()' stores the data in a temporary directory
 italy_admin3 <- gadm(country = "ITA", level = 3, path = tempdir())
 
+#I dati scaricati non sono direttamente in formato sf (spatial feature)
+# Downloaded data are not directly ready for spatial analysis so
 # Convert the downloaded object to a simple feature (sf) object
 italy_admin3 <- st_as_sf(italy_admin3)
 
 # Define the municipalities of interest (in the Province of Sondrio)
-# These are selected because they are key mountain municipalities often impacted by drought
+# These are selected because they are key mountain municipalities
 target_municipalities <- c("Livigno", "Valdidentro", "Valdisotto", "Bormio",
                            "Valfurva", "Grosio", "Sondalo", "Grosotto")
 
@@ -42,18 +55,18 @@ selected_municipalities <- italy_admin3[italy_admin3$NAME_3 %in% target_municipa
 selected_municipalities <- st_make_valid(selected_municipalities)
 
 # Create a bounding box that fully contains the selected municipalities
-# This generates a rectangle (bbox) that minimally wraps all selected areas
+# st_bbox() generates a rectangle (bbox) that minimally wraps all selected areas 
 bbox <- st_bbox(selected_municipalities)
 
-# Convert the bounding box to a spatial feature (polygon)
+# st_as_sfc() converts the bounding box to a spatial feature (polygon)
 bbox_polygon <- st_as_sfc(bbox)
 
 # Wrap the geometry into an sf object and assign it the same CRS (coordinate system) 
-# as the municipalities — very important for consistent plotting and spatial analysis
 bbox_polygon <- st_sf(geometry = bbox_polygon, crs = st_crs(selected_municipalities))
 
 # Plot the bounding box (in red) and the selected municipalities (in transparent blue)
 # This helps visualize how the municipalities are spatially distributed inside the bbox
+# st_geometry() gives back the polygon  without the extra collumns, usefull for drawing and analyzing  spatial components
 plot(st_geometry(bbox_polygon), border = "red", lwd = 2, 
      main = "Bounding Box + Selected Municipalities (GADM)")
 plot(st_geometry(selected_municipalities), add = TRUE, 
@@ -62,12 +75,26 @@ plot(st_geometry(selected_municipalities), add = TRUE,
 # Export or print the bounding box in WKT (Well-Known Text) format
 # Useful for logging, sharing geometry in text form, or using in GIS software
 st_as_text(st_geometry(bbox_polygon))
+
 #"POLYGON ((10.03806 46.26057, 10.63152 46.26057, 10.63152 46.63806, 10.03806 46.63806, 10.03806 46.26057))"
 
 #_______________________________________________________________________________
 
-# Plant seasonal phases:
+#Images format:
 
+#Summary of the downloaded images:
+#TIFF (32-bit float)
+#layer: True Color, NDVI, False Color (urban)
+#single bands B02, B03, B04, B05, B06 B08, B08A B11, B12
+#Image resolution: HIGH 2500 x 2308 px
+#Coordinate system: UTM 32N (EPSG:32632)
+#Projected resolution: 18 m/px
+# Data mask
+
+# Plant seasonal phases considerations
+################################################################################
+
+# Plant seasonal phases:
 # Avoiding the dormancy period because NDVI don't see the photosynthetic activity since it's too low or even absent
 
 # Vegetative awakening (Spring): May 10 – June 9
@@ -87,61 +114,48 @@ st_as_text(st_geometry(bbox_polygon))
 # plant growth, stress, and senescence. These will be used to analyze the impact of drought on vegetation over the years. 
 # This approach helps monitor the seasonal evolution of NDVI and identify anomalies in Italy between 2022 and 2023.
 
-
-#Image format:
-
-#Summary of the downloaded images:
-#TIFF (32-bit float)
-#layer: True Color, NDVI, False Color (urban)
-#single bands B02, B03, B04, B05, B06 B08, B08A B11, B12
-#Image resolution: HIGH 2500 x 2308 px
-#Coordinate system: UTM 32N (EPSG:32632)
-#Projected resolution: 18 m/px
-# Data mask
+################################################################################
 
 #_______________________________________________________________________________
 
-#Now we are trying to load the images in Tiff on R
-setwd("C:/Users/Tommy/Documents/altavaltellian")
+# === Load the images in Tiff on R and visualization ===
+# Required libraries: raster and terra
 
+setwd("C:/Users/Tommy/Documents/altavaltellian")
 getwd()
 #"C:/Users/Tommy/Documents/altavaltellian"
 
 list.files()
 
-tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-
-library(raster)
-library(terra)
-
 # List of all the files in the chosen dirrectory
 tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-print(tif_files)
 
 # Grouping the file based on the layer that we want to analayse
+# Searches for a specific string of text inside of the vector and gives back a logical vector that gives which elements arecontined in that string
 tif_true_color <- tif_files[grepl("True_color", tif_files)]
 tif_NDVI <- tif_files[grepl("NDVI", tif_files)]
 tif_false_color <- tif_files[grepl("False_color", tif_files)]
 
 # Creation of the raster applying terra::rast to all the files
+# lapply(..., terra::rast): applies the function terra::rast() to every element
 rasters_true_color <- lapply(tif_true_color, terra::rast)
 rasters_NDVI <- lapply(tif_NDVI, terra::rast)
 rasters_false_color <- lapply(tif_false_color, terra::rast)
 
-#example to see if the plot goes well
+# Example to see if the plot goes well
+# Linear stretching of the pixel values for a better plotting. It is a visual normalization. 
 rasters_true_color[[1]]
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
 
-# Now a check on the state of the tiff files and the possibility to plot them
-
-# Raster of all the files, even single bands, since some images are corrupted and couldn't be downloaded after many tries
-# This is needed for the construction of the single images
+# After checking the available .tif files and attempting to plot them,
+# it became clear that some images are corrupted or incomplete.
+# Despite multiple download attempts, some files could not be retrieved correctly.
+# Therefore, we need to reconstruct the missing composite layers manually.
+# This step is essential in order to later build the complete set of final images.
 rasters_files <- lapply(tif_files, terra::rast)
 
-rasters_files
-
 # 3-----------------------------------------------------------------------------
-rasters_false_color[[3]]
+rasters_false_color[[3]] # Gives us information on the raster
 #source: 2022-08-09-00_00_2022-09-09-23_59_Sentinel-2_L2A_False_color.tiff
 
 names(rasters_files[[26]])
@@ -152,7 +166,7 @@ b4_2289_2299 <- rasters_files[[26]][[1]] # red
 b3_2289_2299 <- rasters_files[[27]][[1]] # green
 b8_2289_2299 <- rasters_files[[30]][[1]] # (NIR) (8)
 
-# Selecting of the first file to plot only the image and not the raster
+# Extract the first layer of each band to create a single-date RGB image
 nir_2289_2299 <- b8_2289_2299[[1]]
 red_2289_2299 <- b4_2289_2299[[1]]
 green_2289_2299 <- b3_2289_2299[[1]]
@@ -164,7 +178,9 @@ false_color_2289_2299 <- c(nir_2289_2299, red_2289_2299, green_2289_2299)
 plotRGB(false_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "lin", maxcell = Inf)
 
 ####
-# Gives a strange blue hue instead of the usual white
+# The image appears with an unusual blue tint instead of the expected white.
+# This is likely due to differences in how reflectance values are handled in R
+# compared to how they are visualized in the original Sentinel-2 platform.
 ####
 
 # 3-----------------------------------------------------------------------------
@@ -175,22 +191,22 @@ names(rasters_files[[26]])
 names(rasters_files[[27]])
 
 # loading rasters corresponding to the bands of true color
-b2_2289_2299 <- rasters_files[[25]][[1]]  # Blu
-b3_2289_2299 <- rasters_files[[26]][[1]]  # Verde
-b4_2289_2299 <- rasters_files[[27]][[1]]  # Rosso
+b2_2289_2299 <- rasters_files[[25]][[1]]  # Blue
+b3_2289_2299 <- rasters_files[[26]][[1]]  # Green
+b4_2289_2299 <- rasters_files[[27]][[1]]  # Red
 
-# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+# Extract the first layer of each band to create a single-date RGB image
 red_2289_2299 <- b4_2289_2299[[1]]
 green_2289_2299 <- b3_2289_2299[[1]]
 blue_2289_2299 <- b2_2289_2299[[1]]
 
-# Stack delle bande RGB
+# Stack of the RGB bands
 true_color_2289_2299 <- c(red_2289_2299, green_2289_2299, blue_2289_2299)
 
 # Plot RGB
 plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
 
-#maxcel=inf serve per forzare a usare tutti i pixel. Di default ne usa solo un sottoinsieme se l'immagine è grande.
+# Plot false color maxcell=inf is needed to force the use of all the pixels from the file 
 plotRGB(true_color_2289_2299, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
 
 # 6-----------------------------------------------------------------------------
@@ -201,11 +217,11 @@ names(rasters_files[[62]])
 names(rasters_files[[63]])
 
 # loading rasters corresponding to the bands of true color
-b2_23625_23725 <- rasters_files[[61]][[1]]  # Blu
-b3_23625_23725 <- rasters_files[[62]][[1]]  # Verde
-b4_23625_23725 <- rasters_files[[63]][[1]]  # Rosso
+b2_23625_23725 <- rasters_files[[61]][[1]]  # Blue
+b3_23625_23725 <- rasters_files[[62]][[1]]  # Green
+b4_23625_23725 <- rasters_files[[63]][[1]]  # Red
 
-# Seleziona il primo layer (ad esempio se ogni file ha 2 layer temporali)
+# Extract the first layer of each band to create a single-date RGB image
 red_23625_23725 <- b4_23625_23725[[1]]
 green_23625_23725 <- b3_23625_23725[[1]]
 blue_23625_23725 <- b2_23625_23725[[1]]
@@ -216,14 +232,14 @@ true_color_23625_23725 <- c(red_23625_23725, green_23625_23725, blue_23625_23725
 # Plot RGB
 plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale=10000, stretch = "hist")
 
-plot_truecolor_6 <- plotRGB(true_color_23625_23725, r = 1, g = 2, b = 3, scale = 10000, stretch = "hist", maxcell = Inf)
-
 dev.off()
 
 #_______________________________________________________________________________
 
+# === Visualization of the composite layers to give an idea of the area of study ===
+
 # True Color Final
-par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))  # Margini e layout
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))  # Margins and layout
 
 # 2022
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -251,7 +267,6 @@ mtext("09.25–10.25", side = 3, line = 1, cex = 1)
 mtext("True Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 
 dev.off()
-
 
 #False color final
 
@@ -283,7 +298,6 @@ mtext("09.25–10.25", side = 3, line = 1, cex = 1)
 mtext("False Color Sentinel-2", outer = TRUE, side = 3, line = 1, cex = 1.5)
 
 dev.off()
-
 
 #NDVI final 
 
@@ -318,190 +332,14 @@ dev.off()
 
 #_______________________________________________________________________________
 
-
-#ok now we have to progress further with the analysis
-
-tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-
-library(raster)
-library(terra)
-
-# List all .tiff files in the current directory
-tif_files <- list.files(pattern = "\\.tiff$", full.names = TRUE)
-print(tif_files)
-
-tif_B04 <- tif_files[grepl("B04", tif_files)]
-tif_B08 <- tif_files[grepl("B08", tif_files)]
-tif_B11 <- tif_files[grepl("B11", tif_files)]
-
-rasters_tif_B04 <- lapply(tif_B04, terra::rast)
-rasters_tif_B08 <- lapply(tif_B08, terra::rast)
-rasters_tif_B11 <- lapply(tif_B11, terra::rast)
-
-#05102*_06092* → from may 10th to ju e 9th
-#06252*_07252* → from 255h of june to 25th of july
-#08092*_09092* → from 9th of august to the 9th of september
-#09252*_10252* → from the 25th of September to the 25th of October
-
-# Required bands for analysis:
-#   - NDVI (Normalized Difference Vegetation Index):
-#   - Red (Band 4) and NIR (Band 8)
-#   - Formula: NDVI = (NIR - Red) / (NIR + Red)
-#   - Used to assess vegetation health.
-#   - NDVI already be present in the files, but it can be recalculated if needed.
-
-# red band (B04)
-redband04_051022_060922 <- rasters_tif_B04[[1]][[1]]
-redband04_062522_072522 <- rasters_tif_B04[[2]][[1]]
-redband04_080922_090922 <- rasters_tif_B04[[3]][[1]]
-redband04_092522_102522 <- rasters_tif_B04[[4]][[1]]
-
-redband04_051023_060923 <- rasters_tif_B04[[5]][[1]]
-redband04_062523_072523 <- rasters_tif_B04[[6]][[1]]
-redband04_080923_090923 <- rasters_tif_B04[[7]][[1]]
-redband04_092523_102523 <- rasters_tif_B04[[8]][[1]]
-
-# NIR band (B08)
-nirband08_051022_060922 <- rasters_tif_B08[[1]][[1]]
-nirband08_062522_072522 <- rasters_tif_B08[[2]][[1]]
-nirband08_080922_090922 <- rasters_tif_B08[[3]][[1]]
-nirband08_092522_102522 <- rasters_tif_B08[[4]][[1]]
-
-nirband08_051023_060923 <- rasters_tif_B08[[5]][[1]]
-nirband08_062523_072523 <- rasters_tif_B08[[6]][[1]]
-nirband08_080923_090923 <- rasters_tif_B08[[7]][[1]]
-nirband08_092523_102523 <- rasters_tif_B08[[8]][[1]]
-
-# SWIR band (B11)
-swirband11_051022_060922 <- rasters_tif_B11[[1]][[1]]
-swirband11_062522_072522 <- rasters_tif_B11[[2]][[1]]
-swirband11_080922_090922 <- rasters_tif_B11[[3]][[1]]
-swirband11_092522_102522 <- rasters_tif_B11[[4]][[1]]
-
-swirband11_051023_060923 <- rasters_tif_B11[[5]][[1]]
-swirband11_062523_072523 <- rasters_tif_B11[[6]][[1]]
-swirband11_080923_090923 <- rasters_tif_B11[[7]][[1]]
-swirband11_092523_102523 <- rasters_tif_B11[[8]][[1]]
-
-#NDVI = (NIR - Red) / (NIR + Red)
-
-# From previous errors, some files needed to be reprojected on the CRS
-# Mainly the NIR in degrees reprogected on the RED band in meters
-nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
-NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
-
-# NDVI 2022
-NDVI_051022_060922 <- (nirband08_051022_060922 - redband04_051022_060922) / (nirband08_051022_060922 + redband04_051022_060922)
-NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
-NDVI_080922_090922 <- (nirband08_080922_090922 - redband04_080922_090922) / (nirband08_080922_090922 + redband04_080922_090922)
-NDVI_092522_102522 <- (nirband08_092522_102522 - redband04_092522_102522) / (nirband08_092522_102522 + redband04_092522_102522)
-
-# NDVI 2023
-NDVI_051023_060923 <- (nirband08_051023_060923 - redband04_051023_060923) / (nirband08_051023_060923 + redband04_051023_060923)
-NDVI_062523_072523 <- (nirband08_062523_072523 - redband04_062523_072523) / (nirband08_062523_072523 + redband04_062523_072523)
-NDVI_080923_090923 <- (nirband08_080923_090923 - redband04_080923_090923) / (nirband08_080923_090923 + redband04_080923_090923)
-NDVI_092523_102523 <- (nirband08_092523_102523 - redband04_092523_102523) / (nirband08_092523_102523 + redband04_092523_102523)
-
-par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
-
-plot(NDVI_051022_060922[[1]], col = clv, main = "NDVI 05.10–06.09 2022")
-plot(NDVI_062522_072522[[1]], col = clv, main = "NDVI 06.25–07.25 2022")
-plot(NDVI_080922_090922[[1]], col = clv, main = "NDVI 08.09–09.09 2022")
-plot(NDVI_092522_102522[[1]], col = clv, main = "NDVI 09.25–10.25 2022")
-
-plot(NDVI_051023_060923[[1]], col = clv, main = "NDVI 05.10–06.09 2023")
-plot(NDVI_062523_072523[[1]], col = clv, main = "NDVI 06.25–07.25 2023")
-plot(NDVI_080923_090923[[1]], col = clv, main = "NDVI 08.09–09.09 2023")
-plot(NDVI_092523_102523[[1]], col = clv, main = "NDVI 09.25–10.25 2023")
-
-dev.off()
-
-# - NDWI (Normalized Difference Water Index):
-#   - NIR (Band 8) and SWIR1 (Band 11)
-#   - Formula: NDWI = (NIR - SWIR1) / (NIR + SWIR1)
-#   - Used to distinguish between water bodies and stressed vegetation (e.g., drier areas).
-
-# NDWI = (NIR - SWIR1) / (NIR + SWIR1)
-# NDWI 2022
-
-# From previous errors, some files needed to be reprojected on the CRS
-nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
-
-NDWI_051022_060922 <- (nirband08_051022_060922 - swirband11_051022_060922) / (nirband08_051022_060922 + swirband11_051022_060922)
-NDWI_062522_072522 <- (nirband08_062522_072522 - swirband11_062522_072522) / (nirband08_062522_072522 + swirband11_062522_072522)
-NDWI_080922_090922 <- (nirband08_080922_090922 - swirband11_080922_090922) / (nirband08_080922_090922 + swirband11_080922_090922)
-NDWI_092522_102522 <- (nirband08_092522_102522 - swirband11_092522_102522) / (nirband08_092522_102522 + swirband11_092522_102522)
-
-# NDWI 2023
-NDWI_051023_060923 <- (nirband08_051023_060923 - swirband11_051023_060923) / (nirband08_051023_060923 + swirband11_051023_060923)
-NDWI_062523_072523 <- (nirband08_062523_072523 - swirband11_062523_072523) / (nirband08_062523_072523 + swirband11_062523_072523)
-NDWI_080923_090923 <- (nirband08_080923_090923 - swirband11_080923_090923) / (nirband08_080923_090923 + swirband11_080923_090923)
-NDWI_092523_102523 <- (nirband08_092523_102523 - swirband11_092523_102523) / (nirband08_092523_102523 + swirband11_092523_102523)
-
-par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
-
-plot(NDWI_051022_060922[[1]], col = clv, main = "NDWI 05.10–06.09 2022")
-plot(NDWI_062522_072522[[1]], col = clv, main = "NDWI 06.25–07.25 2022")
-plot(NDWI_080922_090922[[1]], col = clv, main = "NDWI 08.09–09.09 2022")
-plot(NDWI_092522_102522[[1]], col = clv, main = "NDWI 09.25–10.25 2022")
-
-plot(NDWI_051023_060923[[1]], col = clv, main = "NDWI 05.10–06.09 2023")
-plot(NDWI_062523_072523[[1]], col = clv, main = "NDWI 06.25–07.25 2023")
-plot(NDWI_080923_090923[[1]], col = clv, main = "NDWI 08.09–09.09 2023")
-plot(NDWI_092523_102523[[1]], col = clv, main = "NDWI 09.25–10.25 2023")
-
-# The results of NDVI and NDWI are used to analyze vegetation health, water stress, and drought effects.
-
-#NDVI
-difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
-difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
-difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
-difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
-
-par(mfrow = c(2, 2))
-plot(difNDVI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
-plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
-plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
-plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
-dev.off()
-
-#NDWI
-difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
-#----------------------------------------------------
-#difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
-#Errore: [-] extents do not match
-# Projection 2023 on CRS from 2022
-NDWI_062523_072523_proj <- terra::project(NDWI_062523_072523, NDWI_062522_072522)
-# Ora resamplefor the extent and resolution match
-NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_062522_072522)
-#----------------------------------------------------
-difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
-difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
-difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
-
-par(mfrow = c(2, 2))
-plot(difNDWI_05[[1]], col = clv, main = "NDWI Diff: 05.10–06.09")
-plot(difNDWI_06[[1]], col = clv, main = "NDWI Diff: 06.25–07.25")
-plot(difNDWI_08[[1]], col = clv, main = "NDWI Diff: 08.09–09.09")
-plot(difNDWI_09[[1]], col = clv, main = "NDWI Diff: 09.25–10.25")
-
-
-#_______________________________________________________________________________
-
 # Now it is time to understand the different impact of the two years
 # We want to see the differences in the photosynthetic activity
 # So it is needed, the classification of the true color map in a way that let us 
 # have a preliminary search on the condition of the forests.
+
 # Later we are going to analyse the values of the NDVI.
 
-#NDVI values range from +1.0 to -1.0. Areas of barren rock, sand, or snow usually
-#show very low NDVI values (for example, 0.1 or less). Sparse vegetation such as 
-#shrubs and grasslands or senescing crops may result in moderate NDVI values 
-#(approximately 0.2 to 0.5). High NDVI values (approximately 0.6 to 0.9) 
-#correspond to dense vegetation such as that found in temperate and tropical 
-#forests or crops at their peak growth stage. 
-
-library(imageRy)
+# Required libraries: imageRy
 
 par(mfrow = c(1,2))
 plotRGB(rasters_true_color[[1]], r = 1, g = 2, b = 3, stretch = "lin")
@@ -541,7 +379,7 @@ P_TC_080922_090922_class <- Freq_TC_080922_090922_class[3] * 100 / Tot_TC_080922
 P_TC_080922_090922_class
 #1 36.7770191 denser vegetation
 #2  4.6405546 cloud coverage on the mountain top
-#3  0.3673657 dunno
+#3  0.3673657 X
 #4 23.1041075 stone and villages
 #5 35.1109532 montain top
 
@@ -567,11 +405,7 @@ Freq_TC_051023_060923_class
 Tot_TC_051023_060923_class <- ncell(Bands_TC_051023_060923_class)
 P_TC_051023_060923_class <- Freq_TC_051023_060923_class[3] * 100 / Tot_TC_051023_060923_class
 P_TC_051023_060923_class
-#1 24.51617 denser vegetation
-#2 51.28898 cloud coverage on the mountains and mountains
-#3 24.19485 villages and pastures
-
-#1  4.911768 it's the outer most margin and it has to be counted as vegetation
+#1 4.911768 it's the outer most margin
 #2 14.960087 border of the forest and stone
 #3 19.869116 denser vegetation
 #4 43.439324 cloud coverage and mountain top
@@ -620,28 +454,31 @@ P_TC_092523_102523_class
 
 #--------------------------------------------------------------------------------
 
+# Vizualization of the percentage
+# Required libraries: ggplot2, patchwork and tidyr
+
 class <- c("Dense vegetation","Baren terrain")
 
-# Percentuali di vegetazione densa per ogni periodo
+# Percentage of denser vegetation for each period and for the barren terrain
 dens_veg <- c(  28.56901,
                 41.14040, 
                 36.77702,
                 38.59825,
-                24.19485,
+                35.68882,
                 50.42995,
                 30.79466,
                 31.53042)
 
 barren_terrain <- 100 - dens_veg
 
-# Etichette dei periodi
+# Names for the different periods
 periods <- c("Vegetative awakening",
              "Maximum activity",
              "Summer stress",
              "Early senescence")
 
 
-# Crea data.frame
+# Creation of the dataframes
 df23 <- data.frame(class,
                    "Vegetative awakening" = c(dens_veg[5], barren_terrain[5]),
                    "Maximum activity" = c(dens_veg[6], barren_terrain[6]),
@@ -654,22 +491,17 @@ df22 <- data.frame(class,
                    "Summer stress" = c(dens_veg[3], barren_terrain[3]),
                    "Early senescence" = c(dens_veg[4], barren_terrain[4]))
 
-install.packages("tidyr")
-library(tidyr)
-
+# Transformation of the dataframe into the long format to make it work on ggplot
 df_long22 <- pivot_longer(df22,
                           cols = -class,
                           names_to = "periods",
                           values_to = "percentage")
-
-
 
 df_long23 <- pivot_longer(df23,
                           cols = -class,
                           names_to = "periods",
                           values_to = "percentage")
 
-library(ggplot2) # For creating graphs
 
 g1 <- ggplot(df_long22, aes(x = periods, y = percentage, fill = class)) +
   geom_bar(stat = "identity", position = "dodge") +
@@ -697,12 +529,199 @@ g2 <- ggplot(df_long23, aes(x = periods, y = percentage, fill = class)) +
         plot.title = element_text(hjust = 0.5))
 g2
 
-install.packages("patchwork")
-library("patchwork")
-
+# Unification of the two plots
 g1 + g2
 
 #_______________________________________________________________________________
+
+# === NDVI and NDWI - Analysis Setup ===
+# The following section prepares and processes Sentinel-2 imagery data to calculate 
+# vegetation and water stress indices (NDVI and NDWI) across different seasonal periods 
+#
+# Corresponding bands to Red (B04), Near Infrared (B08), and SWIR (B11) bands 
+# are filtered and loaded as raster layers and then they are grouped by time periods.
+#
+# NDVI is computed using Red and NIR bands, while NDWI is computed using NIR and SWIR bands.
+# Some rasters needed to be reprojected to a common CRS to allow for correct mathematical 
+# operations. Finally, difference maps are created to assess temporal variation in vegetation 
+# and water stress between the two years, and results are visualized in a comparative layout.
+
+# 05102*_06092* → from may 10th to ju e 9th
+# 06252*_07252* → from 255h of june to 25th of july
+# 08092*_09092* → from 9th of august to the 9th of september
+# 09252*_10252* → from the 25th of September to the 25th of October
+
+# Required libraries: raster and terra
+
+print(tif_files)
+
+tif_B04 <- tif_files[grepl("B04", tif_files)]
+tif_B08 <- tif_files[grepl("B08", tif_files)]
+tif_B11 <- tif_files[grepl("B11", tif_files)]
+
+rasters_tif_B04 <- lapply(tif_B04, terra::rast)
+rasters_tif_B08 <- lapply(tif_B08, terra::rast)
+rasters_tif_B11 <- lapply(tif_B11, terra::rast)
+
+# NDVI (Normalized Difference Vegetation Index):
+#   - Red (Band 4) and NIR (Band 8)
+#   - Formula: NDVI = (NIR - Red) / (NIR + Red)
+#   - Used to assess vegetation health.
+#   - NDVI already be present in the files, but it can be recalculated if needed.
+
+# Red band (B04)
+redband04_051022_060922 <- rasters_tif_B04[[1]][[1]]
+redband04_062522_072522 <- rasters_tif_B04[[2]][[1]]
+redband04_080922_090922 <- rasters_tif_B04[[3]][[1]]
+redband04_092522_102522 <- rasters_tif_B04[[4]][[1]]
+
+redband04_051023_060923 <- rasters_tif_B04[[5]][[1]]
+redband04_062523_072523 <- rasters_tif_B04[[6]][[1]]
+redband04_080923_090923 <- rasters_tif_B04[[7]][[1]]
+redband04_092523_102523 <- rasters_tif_B04[[8]][[1]]
+
+# NIR band (B08)
+nirband08_051022_060922 <- rasters_tif_B08[[1]][[1]]
+nirband08_062522_072522 <- rasters_tif_B08[[2]][[1]]
+nirband08_080922_090922 <- rasters_tif_B08[[3]][[1]]
+nirband08_092522_102522 <- rasters_tif_B08[[4]][[1]]
+
+nirband08_051023_060923 <- rasters_tif_B08[[5]][[1]]
+nirband08_062523_072523 <- rasters_tif_B08[[6]][[1]]
+nirband08_080923_090923 <- rasters_tif_B08[[7]][[1]]
+nirband08_092523_102523 <- rasters_tif_B08[[8]][[1]]
+
+# SWIR band (B11)
+swirband11_051022_060922 <- rasters_tif_B11[[1]][[1]]
+swirband11_062522_072522 <- rasters_tif_B11[[2]][[1]]
+swirband11_080922_090922 <- rasters_tif_B11[[3]][[1]]
+swirband11_092522_102522 <- rasters_tif_B11[[4]][[1]]
+
+swirband11_051023_060923 <- rasters_tif_B11[[5]][[1]]
+swirband11_062523_072523 <- rasters_tif_B11[[6]][[1]]
+swirband11_080923_090923 <- rasters_tif_B11[[7]][[1]]
+swirband11_092523_102523 <- rasters_tif_B11[[8]][[1]]
+
+# NDVI = (NIR - Red) / (NIR + Red)
+
+# From previous errors, some files needed to be reprojected on the CRS
+# Mainly the NIR in degrees reprogected on the RED band in meters
+nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
+NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
+
+# NDVI 2022
+NDVI_051022_060922 <- (nirband08_051022_060922 - redband04_051022_060922) / (nirband08_051022_060922 + redband04_051022_060922)
+NDVI_062522_072522 <- (nir_projected - redband04_062522_072522) / (nir_projected + redband04_062522_072522)
+NDVI_080922_090922 <- (nirband08_080922_090922 - redband04_080922_090922) / (nirband08_080922_090922 + redband04_080922_090922)
+NDVI_092522_102522 <- (nirband08_092522_102522 - redband04_092522_102522) / (nirband08_092522_102522 + redband04_092522_102522)
+
+# NDVI 2023
+NDVI_051023_060923 <- (nirband08_051023_060923 - redband04_051023_060923) / (nirband08_051023_060923 + redband04_051023_060923)
+NDVI_062523_072523 <- (nirband08_062523_072523 - redband04_062523_072523) / (nirband08_062523_072523 + redband04_062523_072523)
+NDVI_080923_090923 <- (nirband08_080923_090923 - redband04_080923_090923) / (nirband08_080923_090923 + redband04_080923_090923)
+NDVI_092523_102523 <- (nirband08_092523_102523 - redband04_092523_102523) / (nirband08_092523_102523 + redband04_092523_102523)
+
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
+
+plot(NDVI_051022_060922[[1]], col = clv, main = "NDVI 05.10–06.09 2022")
+plot(NDVI_062522_072522[[1]], col = clv, main = "NDVI 06.25–07.25 2022")
+plot(NDVI_080922_090922[[1]], col = clv, main = "NDVI 08.09–09.09 2022")
+plot(NDVI_092522_102522[[1]], col = clv, main = "NDVI 09.25–10.25 2022")
+
+plot(NDVI_051023_060923[[1]], col = clv, main = "NDVI 05.10–06.09 2023")
+plot(NDVI_062523_072523[[1]], col = clv, main = "NDVI 06.25–07.25 2023")
+plot(NDVI_080923_090923[[1]], col = clv, main = "NDVI 08.09–09.09 2023")
+plot(NDVI_092523_102523[[1]], col = clv, main = "NDVI 09.25–10.25 2023")
+
+dev.off()
+
+# NDWI (Normalized Difference Water Index):
+#   - NIR (Band 8) and SWIR1 (Band 11)
+#   - Formula: NDWI = (NIR - SWIR1) / (NIR + SWIR1)
+#   - Used to distinguish between water bodies and stressed vegetation (e.g., drier areas).
+
+# NDWI 2022
+
+# From previous errors, some files needed to be reprojected on the CRS
+nir_projected <- terra::project(nirband08_062522_072522, redband04_062522_072522)
+
+NDWI_051022_060922 <- (nirband08_051022_060922 - swirband11_051022_060922) / (nirband08_051022_060922 + swirband11_051022_060922)
+NDWI_062522_072522 <- (nirband08_062522_072522 - swirband11_062522_072522) / (nirband08_062522_072522 + swirband11_062522_072522)
+NDWI_080922_090922 <- (nirband08_080922_090922 - swirband11_080922_090922) / (nirband08_080922_090922 + swirband11_080922_090922)
+NDWI_092522_102522 <- (nirband08_092522_102522 - swirband11_092522_102522) / (nirband08_092522_102522 + swirband11_092522_102522)
+
+# NDWI 2023
+NDWI_051023_060923 <- (nirband08_051023_060923 - swirband11_051023_060923) / (nirband08_051023_060923 + swirband11_051023_060923)
+NDWI_062523_072523 <- (nirband08_062523_072523 - swirband11_062523_072523) / (nirband08_062523_072523 + swirband11_062523_072523)
+NDWI_080923_090923 <- (nirband08_080923_090923 - swirband11_080923_090923) / (nirband08_080923_090923 + swirband11_080923_090923)
+NDWI_092523_102523 <- (nirband08_092523_102523 - swirband11_092523_102523) / (nirband08_092523_102523 + swirband11_092523_102523)
+
+par(mfrow = c(2, 4), mar = c(1, 2, 3, 1), oma = c(0, 3, 3, 2))
+
+plot(NDWI_051022_060922[[1]], col = clv, main = "NDWI 05.10–06.09 2022")
+plot(NDWI_062522_072522[[1]], col = clv, main = "NDWI 06.25–07.25 2022")
+plot(NDWI_080922_090922[[1]], col = clv, main = "NDWI 08.09–09.09 2022")
+plot(NDWI_092522_102522[[1]], col = clv, main = "NDWI 09.25–10.25 2022")
+
+plot(NDWI_051023_060923[[1]], col = clv, main = "NDWI 05.10–06.09 2023")
+plot(NDWI_062523_072523[[1]], col = clv, main = "NDWI 06.25–07.25 2023")
+plot(NDWI_080923_090923[[1]], col = clv, main = "NDWI 08.09–09.09 2023")
+plot(NDWI_092523_102523[[1]], col = clv, main = "NDWI 09.25–10.25 2023")
+
+#_______________________________________________________________________________
+
+#
+# The results of NDVI and NDWI are used to analyze vegetation health, water stress, and drought effects.
+
+# === NDVI ===
+difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
+difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
+difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
+difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
+
+par(mfrow = c(2, 2))
+plot(difNDVI_05[[1]], col = clv, main = "NDVI Diff: 05.10–06.09")
+plot(difNDVI_06[[1]], col = clv, main = "NDVI Diff: 06.25–07.25")
+plot(difNDVI_08[[1]], col = clv, main = "NDVI Diff: 08.09–09.09")
+plot(difNDVI_09[[1]], col = clv, main = "NDVI Diff: 09.25–10.25")
+
+dev.off()
+
+# === NDWI ===
+
+#----------------------------------------------------
+# difNDWI_06 <- NDWI_062523_072523 - NDWI_062522_072522
+# Error: [-] extents do not match
+
+# Projection 2023 on CRS from 2022
+NDWI_062523_072523_proj <- terra::project(NDWI_062523_072523, NDWI_062522_072522)
+# Resample for the extent and resolution match
+NDWI_062523_072523_resampled <- terra::resample(NDWI_062523_072523_proj, NDWI_062522_072522)
+#----------------------------------------------------
+
+difNDWI_05 <- NDWI_051023_060923 - NDWI_051022_060922
+difNDWI_06 <- NDWI_062523_072523_resampled - NDWI_062522_072522
+difNDWI_08 <- NDWI_080923_090923 - NDWI_080922_090922
+difNDWI_09 <- NDWI_092523_102523 - NDWI_092522_102522
+
+par(mfrow = c(2, 2))
+plot(difNDWI_05[[1]], col = clv, main = "NDWI Diff: 05.10–06.09")
+plot(difNDWI_06[[1]], col = clv, main = "NDWI Diff: 06.25–07.25")
+plot(difNDWI_08[[1]], col = clv, main = "NDWI Diff: 08.09–09.09")
+plot(difNDWI_09[[1]], col = clv, main = "NDWI Diff: 09.25–10.25")
+
+dev.off()
+
+#_______________________________________________________________________________
+
+# NDVI and NDWI values range from +1.0 to -1.0. 
+
+# Areas of barren rock, sand, or snow usually
+# show very low NDVI values (for example, 0.1 or less). Sparse vegetation such as 
+# shrubs and grasslands or senescing crops may result in moderate NDVI values 
+# (approximately 0.2 to 0.5). High NDVI values (approximately 0.6 to 0.9) 
+# correspond to dense vegetation such as that found in temperate and tropical 
+# forests or crops at their peak growth stage. 
 
 # Calculation of NDVI difference (ΔNDVI) between periods 
 # to quantify changes in vegetation activity or health over time,
@@ -715,20 +734,12 @@ g1 + g2
 #   Values near -1 or -2 indicate drastic decline (e.g., total vegetation loss)
 #   Values near +1 or +2 indicate strong increase (e.g., new growth or recovery)
 
-difNDVI_05 <- NDVI_051023_060923 - NDVI_051022_060922
-difNDVI_06 <- NDVI_062523_072523 - NDVI_062522_072522
-difNDVI_08 <- NDVI_080923_090923 - NDVI_080922_090922
-difNDVI_09 <- NDVI_092523_102523 - NDVI_092522_102522
-
 val_difNDVI_05 <- values(difNDVI_05) |> 
   na.omit()
-
 val_difNDVI_06 <- values(difNDVI_06) |> 
   na.omit()
-
 val_difNDVI_08 <- values(difNDVI_08) |> 
   na.omit()
-
 val_difNDVI_09 <- values(difNDVI_09) |> 
   na.omit()
 
@@ -737,53 +748,38 @@ summary(val_difNDVI_06)
 summary(val_difNDVI_08)
 summary(val_difNDVI_09)
 
-# function to categorize the NDVI differences based on the limits
-
+####
+# Function to categorize the NDVI differences based on the limits
 categorize_ndvi_diff <- function(x) {
   cut(x, breaks = seq(-2, 2, length.out = 6), right = TRUE)
 }
+####
 
 dh1 <- categorize_ndvi_diff(val_difNDVI_05)
 dh2 <- categorize_ndvi_diff(val_difNDVI_06)
 dh3 <- categorize_ndvi_diff(val_difNDVI_08)
 dh4 <- categorize_ndvi_diff(val_difNDVI_09)
 
-# Costruisci il dataframe finale
+# Construction of the dataframe
 df_dh1 <- as.data.frame(table(dh1))
 colnames(df_dh1) <- c("NDVI_Interval", "Count")
 
-# Ordina per intervallo
-df_dh1$NDVI_Interval <- factor(df_dh1$NDVI_Interval,
-                               levels = levels(dh1),
-                               ordered = TRUE)
-
-# Costruisci il dataframe finale
 df_dh2 <- as.data.frame(table(dh2))
 colnames(df_dh2) <- c("NDVI_Interval", "Count")
 
-# Ordina per intervallo
-df_dh2$NDVI_Interval <- factor(df_dh2$NDVI_Interval,
-                               levels = levels(dh2),
-                               ordered = TRUE)
-
-# Costruisci il dataframe finale
 df_dh3 <- as.data.frame(table(dh3))
 colnames(df_dh3) <- c("NDVI_Interval", "Count")
 
-# Ordina per intervallo
-df_dh3$NDVI_Interval <- factor(df_dh3$NDVI_Interval,
-                               levels = levels(dh3),
-                               ordered = TRUE)
-
-# Costruisci il dataframe finale
 df_dh4 <- as.data.frame(table(dh4))
 colnames(df_dh4) <- c("NDVI_Interval", "Count")
 
-# Ordina per intervallo
-df_dh4$NDVI_Interval <- factor(df_dh4$NDVI_Interval,
-                               levels = levels(dh4),
-                               ordered = TRUE)
+# Order for vegetative interval
+df_dh1$NDVI_Interval <- factor(df_dh1$NDVI_Interval, levels = levels(dh1), ordered = TRUE)
+df_dh2$NDVI_Interval <- factor(df_dh2$NDVI_Interval, levels = levels(dh2), ordered = TRUE)
+df_dh3$NDVI_Interval <- factor(df_dh3$NDVI_Interval, levels = levels(dh3), ordered = TRUE)
+df_dh4$NDVI_Interval <- factor(df_dh4$NDVI_Interval, levels = levels(dh4), ordered = TRUE)
 
+# Plotting the various NDVI differences (ΔNDVI)
 
 h1 <- ggplot(df_dh1,  aes(x = NDVI_Interval, y = Count, fill = NDVI_Interval)) +
   geom_bar(stat = "identity",  position = "dodge") + 
@@ -833,17 +829,35 @@ h1+h2+h3+h4
 #_______________________________________________________________________________
 
 
-# Calcolo delle differenze NDWI (ΔNDWI) tra anni per gli stessi periodi fenologici
+# NDWI (Normalized Difference Water Index) is used to monitor changes in water content 
+# of vegetation or detect the presence of surface water. It typically ranges between -1 and +1.
+
+# Interpretation of NDWI values:
+#   < 0   --> Typically indicates land surfaces such as soil, dry vegetation, or built-up areas
+#   ≈ 0   --> Transitional zones; may correspond to moist soil or sparse vegetation
+#   > 0   --> Indicates the presence of water or high moisture content in vegetation
+#   Values closer to +1 suggest strong water signals (e.g., open water bodies)
+#   Values closer to -1 indicate very dry areas or impervious surfaces
+
+# Calculation of NDWI difference (ΔNDWI) between time periods 
+# allows for the detection of hydrological changes, such as:
+#   - Reduction in surface water (e.g., due to drought or drainage)
+#   - Increase in moisture (e.g., after rainfall or irrigation)
+#   - Monitoring vegetation water stress or wetland dynamics
+
+# Interpretation of ΔNDWI values:
+#   ≈ 0   --> No significant change in moisture or water presence
+#   < 0   --> Decrease in water content (drying trend)
+#   > 0   --> Increase in water content (wetting trend)
+#   Values near -1 indicate strong water loss (e.g., wetland drying)
+#   Values near +1 indicate strong water gain (e.g., flooding or recharge)
 
 val_difNDWI_05 <- values(difNDWI_05) |> 
   na.omit()
-
 val_difNDWI_06 <- values(difNDWI_06) |> 
   na.omit()
-
 val_difNDWI_08 <- values(difNDWI_08) |> 
   na.omit()
-
 val_difNDWI_09 <- values(difNDWI_09) |> 
   na.omit()
 
@@ -857,24 +871,26 @@ dhw2 <- categorize_ndvi_diff(val_difNDWI_06)
 dhw3 <- categorize_ndvi_diff(val_difNDWI_08)
 dhw4 <- categorize_ndvi_diff(val_difNDWI_09)
 
-# Costruzione dei dataframe
+# Construction of the dataframe
 df_dhw1 <- as.data.frame(table(dhw1))
 colnames(df_dhw1) <- c("NDWI_Interval", "Count")
-df_dhw1$NDWI_Interval <- factor(df_dhw1$NDWI_Interval, levels = levels(dhw1), ordered = TRUE)
 
 df_dhw2 <- as.data.frame(table(dhw2))
 colnames(df_dhw2) <- c("NDWI_Interval", "Count")
-df_dhw2$NDWI_Interval <- factor(df_dhw2$NDWI_Interval, levels = levels(dhw2), ordered = TRUE)
 
 df_dhw3 <- as.data.frame(table(dhw3))
 colnames(df_dhw3) <- c("NDWI_Interval", "Count")
-df_dhw3$NDWI_Interval <- factor(df_dhw3$NDWI_Interval, levels = levels(dhw3), ordered = TRUE)
 
 df_dhw4 <- as.data.frame(table(dhw4))
 colnames(df_dhw4) <- c("NDWI_Interval", "Count")
+
+# Order for vegetative interval
+df_dhw1$NDWI_Interval <- factor(df_dhw1$NDWI_Interval, levels = levels(dhw1), ordered = TRUE)
+df_dhw2$NDWI_Interval <- factor(df_dhw2$NDWI_Interval, levels = levels(dhw2), ordered = TRUE)
+df_dhw3$NDWI_Interval <- factor(df_dhw3$NDWI_Interval, levels = levels(dhw3), ordered = TRUE)
 df_dhw4$NDWI_Interval <- factor(df_dhw4$NDWI_Interval, levels = levels(dhw4), ordered = TRUE)
 
-# Visualizzazione
+# Plotting the various NDVI differences (ΔNDVI)
 hw1 <- ggplot(df_dhw1, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) +
   geom_bar(stat = "identity", position = "dodge") + 
   scale_fill_viridis_d(option = "D") + 
@@ -913,32 +929,25 @@ hw4 <- ggplot(df_dhw4, aes(x = NDWI_Interval, y = Count, fill = NDWI_Interval)) 
 
 hw1 + hw2 + hw3 + hw4
 
-
-################################################################################
+#_______________________________________________________________________________
 
 # Values of the single years for the statistical analisis 
 
 val_NDVI_051022_060922 <- values(NDVI_051022_060922) |> 
   na.omit()
-
 val_NDVI_062522_072522 <- values(NDVI_062522_072522) |> 
   na.omit()
-
 val_NDVI_080922_090922 <- values(NDVI_080922_090922) |> 
   na.omit()
-
 val_NDVI_092522_102522 <- values(NDVI_092522_102522) |>   
   na.omit()
 
 val_NDVI_051023_060923 <- values(NDVI_051023_060923) |> 
   na.omit()
-
 val_NDVI_062523_072523 <- values(NDVI_062523_072523) |> 
   na.omit()
-
 val_NDVI_080923_090923 <- values(NDVI_080923_090923) |> 
   na.omit()
-
 val_NDVI_092523_102523 <- values(NDVI_092523_102523) |>   
   na.omit()
 
@@ -985,36 +994,31 @@ wilcox.test(val_NDVI_092522_102522, val_NDVI_092523_102523, paired = FALSE)
 # so to better understand the magnitude and trend of NDVI differences, 
 
 
-# Estrazione dei valori dei singoli anni per NDWI
+# Extraction of the single values foe each year for NDWI
 
 val_NDWI_051022_060922 <- values(NDWI_051022_060922) |> 
   na.omit()
-
 val_NDWI_062522_072522 <- values(NDWI_062522_072522) |> 
   na.omit()
-
 val_NDWI_080922_090922 <- values(NDWI_080922_090922) |> 
   na.omit()
-
 val_NDWI_092522_102522 <- values(NDWI_092522_102522) |>   
   na.omit()
 
-
 val_NDWI_051023_060923 <- values(NDWI_051023_060923) |> 
   na.omit()
-
 val_NDWI_062523_072523_resampled <- values(NDWI_062523_072523_resampled) |> 
   na.omit()
-
 val_NDWI_080923_090923 <- values(NDWI_080923_090923) |> 
   na.omit()
-
 val_NDWI_092523_102523 <- values(NDWI_092523_102523) |>   
   na.omit()
 
 
-# Test di Wilcoxon rank-sum per confrontare i valori NDWI tra gli anni
-# paired = FALSE perché le posizioni dei pixel potrebbero non corrispondere esattamente
+# Wilcoxon rank-sum test to compare NDWI values between years.
+# paired = FALSE because pixel positions may not correspond exactly
+# (i.e., we are comparing independent samples, not matched observations).
+
 
 wilcox.test(val_NDWI_051022_060922, val_NDWI_051023_060923, paired = FALSE)
 #Wilcoxon rank sum test with continuity correction
