@@ -457,15 +457,7 @@ P_TC_092523_102523_class
 class <- c("Dense vegetation","Baren terrain")
 
 # Percentage of denser vegetation for each period and for the barren terrain
-dens_veg <- c(  28.56901,
-                41.14040, 
-                36.77702,
-                38.59825,
-                35.68882,
-                50.42995,
-                30.79466,
-                31.53042)
-
+dens_veg <- c(28.56901, 41.14040, 36.77702, 38.59825, 35.68882, 50.42995, 30.79466, 31.53042)
 barren_terrain <- 100 - dens_veg
 
 # Names for the different periods
@@ -473,7 +465,6 @@ periods <- c("Vegetative awakening",
              "Maximum activity",
              "Summer stress",
              "Early senescence")
-
 
 # Creation of the dataframes
 df23 <- data.frame(class,
