@@ -1,11 +1,10 @@
-# Spatial Ecology Project: NDVI & Drought Impact - Province of Sondrio
+# Spatial Ecology Project: IMPACT OF CLIMATE CHANGE ON MOUNTAINOUS ECOSYSTEMS - Evaluation of the Ecological Effects of Climate Change in the Alta Valtellina Area
 # Author: Tommaso Magarotto
 
 # Goal: Analyze the impact of drought on vegetation using NDVI (Sentinel-2) 
-# and climate data, aggregated by season
 
-# The time period we will focus on is from 2022 to 2024
-# During this period, Italy experienced several extreme events, including droughts and floods. 
+# The period we will focus on is from 2022 to 2023
+# Italy experienced several extreme events during this period, including droughts and floods. 
 # The goal is to assess the impact of these extreme events on mountainous ecosystems.
 
 #_______________________________________________________________________________
