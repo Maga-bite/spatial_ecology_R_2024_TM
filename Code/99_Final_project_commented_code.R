@@ -16,7 +16,7 @@
 library(sf)         # For handling spatial vector data (e.g., polygons, shapefiles)
 library(geodata)    # For downloading administrative boundaries (e.g., GADM dataset)
 library(viridis)    # Color palettes optimized for visibility and accessibility
-library(imageRy)    # Used for working with raster/image data, in this case for working with the classification of true color images
+library(imageRy)    # Used for working with raster/image data
 library(tidyr)      # For data wrangling and reshaping
 library(ggplot2)    # For creating elegant data visualizations
 library(patchwork)  # For combining multiple ggplot2 plots
