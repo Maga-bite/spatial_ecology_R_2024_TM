@@ -1035,8 +1035,8 @@ wilcox.test(val_NDWI_092522_102522, val_NDWI_092523_102523, paired = FALSE)
 # (p = 1.184e-05), indicating consistent changes in vegetation water content.
 #
 # These results support the hypothesis that environmental factors, such as drought or climate anomalies, had 
-# a measurable impact on vegetation conditions in the study area between 2022 and 2023.nal periods in 2022 and 2023 show statistically significant 
-# differences (p-value < 2.2e-16) suggest a substantial vegetation activity shift across all periods.
+# a measurable impact on vegetation conditions in the study area between 2022 and 2023. Periods in 2022 and 2023 show statistically significant 
+# differences (p-value < 2.2e-16) suggesting a substantial vegetation activity shift across all periods.
 #
 # Similarly, all NDWI comparisons show statistically significant differences as well. Three out of four 
 # periods have p-values < 2.2e-16, while the remaining period (August–September) still shows significance 
